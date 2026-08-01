@@ -64,11 +64,13 @@
   .field-label{ font-size:11px; color:var(--ink-dim); margin-bottom:6px; }
   input{
     width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line);
-    background:var(--panel-2); color:var(--ink); font-family:'JetBrains Mono',monospace;
-    font-size:14px; direction:ltr; text-align:center; outline:none; letter-spacing:2px;
+    background:var(--panel-2); color:var(--ink); font-family:'Vazirmatn',sans-serif;
+    font-size:14px; text-align:center; outline:none;
   }
+  input.mono{ font-family:'JetBrains Mono',monospace; direction:ltr; letter-spacing:1px; }
   input:focus{ border-color:var(--amber); box-shadow:0 0 0 3px rgba(240,171,77,0.12); }
-  input::placeholder{ font-family:'Vazirmatn'; color:var(--ink-dim); letter-spacing:0; }
+  input::placeholder{ color:var(--ink-dim); }
+  .field{ margin-bottom:14px; }
 
   button.act{
     width:100%; margin-top:12px; padding:14px 10px; border-radius:14px; border:none;
@@ -78,6 +80,7 @@
     box-shadow:0 8px 20px -6px rgba(63,224,189,0.5);
   }
   button.act:active{ transform:scale(0.97); }
+  button.act:disabled{ opacity:0.5; cursor:not-allowed; }
   button.act.leave{ background:linear-gradient(120deg,var(--red),#c8323a); color:#2b0708; box-shadow:0 8px 20px -6px rgba(239,74,82,0.5); }
 
   .stage{ display:flex; flex-direction:column; align-items:center; padding:8px 0 4px; }
@@ -88,12 +91,12 @@
     background:radial-gradient(circle at 35% 30%, #232b36, #171b22); border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace;
     font-size:12px; color:var(--ink-dim); box-shadow:inset 0 2px 6px rgba(0,0,0,0.4);
-    user-select:none; touch-action:none;
+    user-select:none; touch-action:none; text-align:center; padding:6px; overflow:hidden;
   }
   .ring-core.on{ color:var(--teal); border-color:rgba(63,224,189,0.45); }
   .ring-core.pttable{ cursor:pointer; }
   .timer{ font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; color:var(--ink-dim); min-height:16px; }
-  .roomline{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); margin-top:4px; display:flex; gap:10px; align-items:center; }
+  .roomline{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); margin-top:4px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
   .roomline b{ color:var(--amber); }
   .copybtn{
     background:transparent; border:1px solid var(--line); color:var(--ink-dim); border-radius:8px;
@@ -112,10 +115,10 @@
   .pring{
     width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:radial-gradient(circle at 35% 30%, #232b36, #171b22); border:1px solid var(--line);
-    font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:var(--ink-dim);
+    font-family:'Vazirmatn',sans-serif; font-size:16px; font-weight:600; color:var(--ink-dim);
     transition:box-shadow 0.08s linear, border-color 0.15s;
   }
-  .pname{ font-size:11px; color:var(--ink-dim); }
+  .pname{ font-size:11px; color:var(--ink-dim); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .prow{ display:flex; align-items:center; gap:4px; width:100%; }
   .prow input[type=range]{
     -webkit-appearance:none; width:100%; height:3px; border-radius:3px; background:var(--line);
@@ -186,9 +189,15 @@
 
   <!-- ورود به اتاق -->
   <div class="panel" id="joinPanel">
-    <div class="field-label">کد اتاق (خالی بذار تا خودش بسازه)</div>
-    <input id="roomInput" placeholder="مثلا AB3XQ" maxlength="8" />
-    <button class="act" id="joinBtn">ساخت / ورود به اتاق</button>
+    <div class="field">
+      <div class="field-label">اسم خودت (برای شناسایی توی تماس)</div>
+      <input id="nameInput" placeholder="مثلاً: علی" maxlength="16" />
+    </div>
+    <div class="field">
+      <div class="field-label">اسم اتاق — خودت انتخاب کن (اولین نفر می‌سازتش، بقیه همینو وارد می‌کنن)</div>
+      <input id="roomInput" class="mono" placeholder="مثلا yakarim-gang" maxlength="24" />
+    </div>
+    <button class="act" id="joinBtn">ورود به اتاق</button>
   </div>
 
   <!-- داخل اتاق -->
@@ -200,12 +209,12 @@
       </div>
       <div class="timer" id="timer">00:00</div>
       <div class="roomline">
-        اتاق: <b id="roomCodeDisp">-</b> · جایگاه <b id="mySlotDisp">-</b>
+        اتاق: <b id="roomCodeDisp">-</b>
         <button class="copybtn" id="copyLinkBtn">کپی لینک دعوت</button>
       </div>
     </div>
 
-    <div class="capacity" id="capacityText">۰ / ۶ نفر متصل</div>
+    <div class="capacity" id="capacityText">۱ / ۶ نفر متصل</div>
 
     <div class="grid-participants" id="participantsGrid">
       <div class="empty-hint" id="emptyHint">منتظر پیوستن بقیه… لینک دعوت رو بفرست</div>
@@ -242,23 +251,24 @@
 const MAX_SLOTS = 6;
 const PEER_OPTS = { host:'0.peerjs.com', port:443, secure:true };
 
-let peer = null, mySlot = null, roomCode = null;
-let micStream = null, localSource = null, localAnalyser = null;
+let peer = null, mySlot = null, roomCode = null, myName = 'من';
+let micStreamPromise = null, micStream = null, localSource = null, localAnalyser = null;
 let noiseCancelOn = true, muted = false, deafened = false;
 let pttMode = false, pttActive = false;
 let screenStream = null, screenCallsOut = {};
 let isRecording = false, mediaRecorder = null, recordedChunks = [], recDestNode = null;
 let audioCtx = null, vizRAF = null;
 let timerInterval = null, secondsElapsed = 0;
-let participants = {}; // slot -> {slot,id,audioCall,remoteStream,audioEl,source,analyser,volume,mutedLocally,el:{ring}}
+let participants = {}; // slot -> {slot,name,audioCall,dataConn,remoteStream,audioEl,source,analyser,volume,mutedLocally,el:{ring,name}}
+let rescanTimeouts = [];
 
+const nameInput = document.getElementById('nameInput');
 const roomInput = document.getElementById('roomInput');
 const joinBtn = document.getElementById('joinBtn');
 const joinPanel = document.getElementById('joinPanel');
 const callPanel = document.getElementById('callPanel');
 const roomTag = document.getElementById('roomTag');
 const roomCodeDisp = document.getElementById('roomCodeDisp');
-const mySlotDisp = document.getElementById('mySlotDisp');
 const copyLinkBtn = document.getElementById('copyLinkBtn');
 const capacityText = document.getElementById('capacityText');
 const participantsGrid = document.getElementById('participantsGrid');
@@ -282,26 +292,25 @@ const remoteScreensWrap = document.getElementById('remoteScreensWrap');
 const leaveBtn = document.getElementById('leaveBtn');
 
 const urlParams = new URLSearchParams(location.search);
-if (urlParams.get('room')) roomInput.value = urlParams.get('room').toUpperCase();
+if (urlParams.get('room')) roomInput.value = urlParams.get('room');
 
-function generateCode(){
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s=''; for(let i=0;i<5;i++) s += chars[Math.floor(Math.random()*chars.length)];
-  return s;
-}
-
+// ---------- helpers ----------
 function ensureAudioCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 
 function micConstraints(){
   return { audio:{ noiseSuppression:noiseCancelOn, echoCancellation:noiseCancelOn, autoGainControl:noiseCancelOn }, video:false };
 }
 
-async function getMic(){
-  if (!micStream){
-    micStream = await navigator.mediaDevices.getUserMedia(micConstraints());
-    setupLocalAnalyser(micStream);
+// concurrency-safe mic getter: همیشه یک promise واحد برمی‌گردونه، حتی اگه چند جا هم‌زمان صداش بزنن
+function getMic(){
+  if (!micStreamPromise){
+    micStreamPromise = navigator.mediaDevices.getUserMedia(micConstraints()).then(stream=>{
+      micStream = stream;
+      setupLocalAnalyser(stream);
+      return stream;
+    });
   }
-  return micStream;
+  return micStreamPromise;
 }
 
 function setupLocalAnalyser(stream){
@@ -369,12 +378,18 @@ function startTimer(){
 }
 function stopTimer(){ clearInterval(timerInterval); timerEl.textContent='00:00'; }
 
-function slugId(code, slot){ return `yak-${code}-${slot}`; }
+// اسم اتاق (هر متنی، حتی فارسی) رو به یه شناسه‌ی امن و یکسان برای PeerJS تبدیل می‌کنیم
+function slugifyRoom(raw){
+  let hash = 0;
+  for (let i=0;i<raw.length;i++){ hash = (hash*31 + raw.charCodeAt(i)) >>> 0; }
+  return 'r' + hash.toString(36);
+}
+function slugId(roomSlug, slot){ return `yak-${roomSlug}-${slot}`; }
 function extractSlot(peerId){ const parts = peerId.split('-'); return parseInt(parts[parts.length-1],10); }
 
-function tryRegisterSlot(code, slot){
+function tryRegisterSlot(roomSlug, slot){
   return new Promise((resolve, reject) => {
-    const id = slugId(code, slot);
+    const id = slugId(roomSlug, slot);
     const p = new Peer(id, PEER_OPTS);
     function cleanup(){ p.off('open', onOpen); p.off('error', onError); }
     function onOpen(){ cleanup(); resolve(p); }
@@ -387,23 +402,26 @@ function tryRegisterSlot(code, slot){
     p.on('error', onError);
   });
 }
-
-async function joinRoom(code){
+async function joinRoom(roomSlug){
   for (let slot=1; slot<=MAX_SLOTS; slot++){
-    try { const p = await tryRegisterSlot(code, slot); return {peer:p, slot}; }
+    try { const p = await tryRegisterSlot(roomSlug, slot); return {peer:p, slot}; }
     catch(e){ if (e && e.retry) continue; throw (e && e.err) || new Error('join-failed'); }
   }
   const full = new Error('room-full'); full.code='room-full'; throw full;
 }
 
 joinBtn.addEventListener('click', async () => {
-  let code = roomInput.value.trim().toUpperCase();
-  if (!code) code = generateCode();
+  const name = nameInput.value.trim();
+  const rawRoom = roomInput.value.trim();
+  if (!name){ statusEl.textContent = 'اول یه اسم برای خودت وارد کن'; return; }
+  if (!rawRoom){ statusEl.textContent = 'یه اسم برای اتاق انتخاب کن'; return; }
+  myName = name;
+  const roomSlug = slugifyRoom(rawRoom.toLowerCase());
   statusEl.textContent = 'در حال ورود به اتاق…';
   joinBtn.disabled = true;
   try {
-    const {peer:p, slot} = await joinRoom(code);
-    peer = p; mySlot = slot; roomCode = code;
+    const {peer:p, slot} = await joinRoom(roomSlug);
+    peer = p; mySlot = slot; roomCode = rawRoom;
     onJoined();
   } catch(e){
     statusEl.textContent = (e && e.code==='room-full') ? 'اتاق پر است (حداکثر ۶ نفر)' : 'خطا در ورود به اتاق';
@@ -415,33 +433,47 @@ joinBtn.addEventListener('click', async () => {
 function onJoined(){
   joinPanel.classList.add('hidden');
   callPanel.classList.remove('hidden');
-  roomTag.innerHTML = `اتاق <b>${roomCode}</b>`;
+  roomTag.innerHTML = `اتاق <b>${escapeHtml(roomCode)}</b>`;
   roomCodeDisp.textContent = roomCode;
-  mySlotDisp.textContent = mySlot;
   ringCore.classList.add('on');
-  ringCore.textContent = 'متصل';
+  ringCore.textContent = myName;
   statusEl.textContent = 'در حال جست‌وجوی همراهان…';
   startTimer();
   updateCapacity();
   renderParticipants();
 
   peer.on('call', handleIncomingCall);
+  peer.on('connection', handleIncomingData);
   peer.on('error', (err) => {
     if (err && err.type === 'peer-unavailable') return; // یعنی اون جایگاه خالیه، طبیعیه
     statusEl.textContent = 'خطا: ' + (err ? err.type : 'نامشخص');
   });
 
-  getMic().then(() => scanAndCallOthers());
+  getMic().then(() => {
+    scanAndCallOthers();
+    // چند بار دیگه هم دوباره اسکن کن تا رِیس‌کاندیشن‌های تایمینگ رفع بشه
+    [3000, 7000, 13000].forEach(delay=>{
+      const t = setTimeout(scanAndCallOthers, delay);
+      rescanTimeouts.push(t);
+    });
+  });
 }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const roomSlugFor = () => slugifyRoom(roomCode.toLowerCase());
 
 async function scanAndCallOthers(){
   const stream = await getMic();
+  const roomSlug = roomSlugFor();
   for (let slot=1; slot<=MAX_SLOTS; slot++){
     if (slot === mySlot) continue;
-    const id = slugId(roomCode, slot);
+    if (participants[slot] && participants[slot].connected) continue; // قبلاً وصل شدیم، دوباره لازم نیست
+    const id = slugId(roomSlug, slot);
     try {
-      const call = peer.call(id, stream, { metadata:{ type:'audio' } });
-      registerParticipantCall(slot, call);
+      const call = peer.call(id, stream, { metadata:{ type:'audio', name:myName } });
+      trackPendingCall(slot, call);
+      const dconn = peer.connect(id, { reliable:true });
+      trackPendingData(slot, dconn);
     } catch(e) { /* جایگاه خالیه، بی‌خیال */ }
   }
 }
@@ -458,27 +490,39 @@ function handleIncomingCall(call){
   const slot = extractSlot(call.peer);
   getMic().then(stream => {
     call.answer(stream);
-    registerParticipantCall(slot, call);
+    if (meta.name) ensureParticipant(slot).name = meta.name;
+    trackPendingCall(slot, call);
   });
 }
+function handleIncomingData(dconn){
+  const slot = extractSlot(dconn.peer);
+  trackPendingData(slot, dconn);
+}
 
-function registerParticipantCall(slot, call){
-  if (participants[slot] && participants[slot].audioCall && participants[slot].audioCall.open){
-    call.close(); return;
+function ensureParticipant(slot){
+  if (!participants[slot]){
+    participants[slot] = { slot, name:'همراه #'+slot, volume:1, mutedLocally:false, connected:false };
   }
-  const p = participants[slot] || { slot, id: call.peer, volume:1, mutedLocally:false };
-  p.audioCall = call;
-  participants[slot] = p;
+  return participants[slot];
+}
 
+// یک تماس تا وقتی که واقعاً stream نده، جزو «شرکت‌کننده‌ی متصل» حساب نمی‌شه — این باعث می‌شد شمارش اشتباه بشه
+function trackPendingCall(slot, call){
+  const p = ensureParticipant(slot);
+  if (p.audioCall && p.audioCall !== call && p.connected){ call.close(); return; }
+  p.audioCall = call;
   call.on('stream', remoteStream => {
+    p.connected = true;
     p.remoteStream = remoteStream;
-    const audioEl = document.createElement('audio');
-    audioEl.autoplay = true; audioEl.playsInline = true;
-    audioEl.srcObject = remoteStream;
-    audioEl.volume = deafened ? 0 : p.volume;
-    audioEl.muted = p.mutedLocally;
-    document.body.appendChild(audioEl);
-    p.audioEl = audioEl;
+    if (!p.audioEl){
+      const audioEl = document.createElement('audio');
+      audioEl.autoplay = true; audioEl.playsInline = true;
+      document.body.appendChild(audioEl);
+      p.audioEl = audioEl;
+    }
+    p.audioEl.srcObject = remoteStream;
+    p.audioEl.volume = deafened ? 0 : p.volume;
+    p.audioEl.muted = p.mutedLocally;
     setupParticipantAnalyser(p, remoteStream);
     renderParticipants();
     updateCapacity();
@@ -487,6 +531,23 @@ function registerParticipantCall(slot, call){
   });
   call.on('close', () => removeParticipant(slot));
   call.on('error', () => removeParticipant(slot));
+}
+function trackPendingData(slot, dconn){
+  const p = ensureParticipant(slot);
+  if (p.dataConn && p.dataConn.open) return;
+  p.dataConn = dconn;
+  dconn.on('open', () => { dconn.send({ type:'hello', name: myName }); });
+  dconn.on('data', payload => {
+    if (payload && payload.type === 'hello' && payload.name){
+      p.name = payload.name;
+      updatePname(slot);
+      renderParticipants();
+    }
+  });
+}
+function updatePname(slot){
+  const p = participants[slot];
+  if (p && p.el && p.el.name) p.el.name.textContent = p.name;
 }
 
 function removeParticipant(slot){
@@ -499,12 +560,12 @@ function removeParticipant(slot){
 }
 
 function updateCapacity(){
-  const count = Object.keys(participants).length + 1;
+  const count = Object.values(participants).filter(p=>p.connected).length + 1;
   capacityText.textContent = `${count} / ${MAX_SLOTS} نفر متصل`;
 }
 
 function renderParticipants(){
-  const slots = Object.keys(participants).map(Number).sort((a,b)=>a-b);
+  const slots = Object.keys(participants).map(Number).filter(s=>participants[s].connected).sort((a,b)=>a-b);
   if (slots.length === 0){
     participantsGrid.innerHTML = '';
     participantsGrid.appendChild(emptyHint);
@@ -516,15 +577,15 @@ function renderParticipants(){
     const card = document.createElement('div');
     card.className = 'pcard';
     card.innerHTML = `
-      <div class="pring" id="pring-${slot}">${slot}</div>
-      <div class="pname">همراه #${slot}</div>
+      <div class="pring" id="pring-${slot}">${(p.name||'؟').slice(0,2)}</div>
+      <div class="pname">${escapeHtml(p.name)}</div>
       <div class="prow">
         <input type="range" min="0" max="100" value="${Math.round(p.volume*100)}" class="pvol" data-slot="${slot}">
         <button class="pmute" data-slot="${slot}">🔊</button>
       </div>
     `;
     participantsGrid.appendChild(card);
-    p.el = { ring: card.querySelector('.pring') };
+    p.el = { ring: card.querySelector('.pring'), name: card.querySelector('.pname') };
 
     card.querySelector('.pvol').addEventListener('input', (e) => {
       const v = parseInt(e.target.value,10)/100;
@@ -552,7 +613,7 @@ function updateMuteBtnUI(slot){
 }
 
 copyLinkBtn.addEventListener('click', () => {
-  const url = `${location.origin}${location.pathname}?room=${roomCode}`;
+  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomCode)}`;
   navigator.clipboard.writeText(url).then(() => {
     copyLinkBtn.textContent = 'کپی شد ✓';
     setTimeout(() => copyLinkBtn.textContent = 'کپی لینک دعوت', 1500);
@@ -588,6 +649,7 @@ noiseBtn.addEventListener('click', async () => {
     }
     micStream.getAudioTracks().forEach(t => t.stop());
     micStream = newStream;
+    micStreamPromise = Promise.resolve(newStream);
     setupLocalAnalyser(micStream);
   } catch(e){ statusEl.textContent = 'تعویض میکروفون ناموفق بود'; }
 });
@@ -631,11 +693,11 @@ shareBtn.addEventListener('click', async () => {
   localScreenBox.style.display = 'block';
   shareBtn.classList.add('active');
   shareBtn.innerHTML = '<span class="ic">⏹</span>توقف اشتراک';
-  for (const slot in participants) sendScreenTo(slot);
+  Object.keys(participants).filter(s=>participants[s].connected).forEach(slot => sendScreenTo(slot));
   screenStream.getVideoTracks()[0].addEventListener('ended', stopScreenShare);
 });
 function sendScreenTo(slot){
-  const id = slugId(roomCode, slot);
+  const id = slugId(roomSlugFor(), slot);
   const call = peer.call(id, screenStream, { metadata:{ type:'screen', fromSlot:mySlot } });
   screenCallsOut[slot] = call;
 }
@@ -655,7 +717,8 @@ function addIncomingScreen(fromSlot, stream){
     box = document.createElement('div');
     box.className = 'screenbox';
     box.id = 'rscreen-'+fromSlot;
-    box.innerHTML = `<span class="tag">صفحه‌ی همراه #${fromSlot}</span><video autoplay playsinline></video>`;
+    const label = (participants[fromSlot] && participants[fromSlot].name) || ('همراه #'+fromSlot);
+    box.innerHTML = `<span class="tag">صفحه‌ی ${escapeHtml(label)}</span><video autoplay playsinline></video>`;
     remoteScreensWrap.appendChild(box);
   }
   box.querySelector('video').srcObject = stream;
@@ -699,14 +762,16 @@ function stopRecording(){
 
 // خروج از اتاق
 leaveBtn.addEventListener('click', () => {
+  rescanTimeouts.forEach(t=>clearTimeout(t)); rescanTimeouts=[];
   Object.keys(participants).forEach(slot => {
     if (participants[slot].audioCall) participants[slot].audioCall.close();
+    if (participants[slot].dataConn) participants[slot].dataConn.close();
   });
   stopScreenShare();
   if (isRecording) stopRecording();
   if (micStream) micStream.getTracks().forEach(t => t.stop());
   if (peer) { try{ peer.destroy(); }catch(e){} }
-  participants = {}; micStream=null; localSource=null; localAnalyser=null;
+  participants = {}; micStream=null; micStreamPromise=null; localSource=null; localAnalyser=null;
   peer=null; mySlot=null; roomCode=null;
   stopTimer();
   remoteScreensWrap.innerHTML = '';
