@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>یاکریم کال پی‌تی — استودیوی گروهی</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e13;
+    --panel-2:#1b212b;
+    --line:#262e3a;
+    --line-soft:#1e242e;
+    --ink:#eef1f4;
+    --ink-dim:#7d8898;
+    --amber:#f0ab4d;
+    --amber-glow:rgba(240,171,77,0.35);
+    --teal:#3fe0bd;
+    --teal-glow:rgba(63,224,189,0.35);
+    --red:#ef4a52;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+    font-family:'Vazirmatn','Space Grotesk',sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; overflow-x:hidden; position:relative;
+  }
+  .aurora{
+    position:fixed; inset:-20%; z-index:0;
+    background:
+      radial-gradient(600px 400px at 20% 20%, var(--amber-glow), transparent 60%),
+      radial-gradient(700px 500px at 85% 15%, var(--teal-glow), transparent 60%),
+      radial-gradient(900px 600px at 50% 100%, rgba(120,90,220,0.16), transparent 60%);
+    filter:blur(60px); animation:drift 22s ease-in-out infinite alternate; opacity:0.7;
+  }
+  @keyframes drift{ 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(3%,-2%) scale(1.06);} }
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.03;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .console{
+    position:relative; z-index:2; width:100%; max-width:520px;
+    background:linear-gradient(180deg, rgba(26,32,41,0.9), rgba(20,24,31,0.95));
+    backdrop-filter:blur(18px); border:1px solid var(--line); border-radius:24px;
+    overflow:hidden; box-shadow:0 40px 80px -30px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .band{ height:3px; background:linear-gradient(90deg,var(--amber),var(--teal),var(--amber)); background-size:200% 100%; animation:bandmove 6s linear infinite; }
+  @keyframes bandmove{ to{ background-position:200% 0; } }
+  .head{ padding:20px 26px 14px; border-bottom:1px solid var(--line-soft); display:flex; align-items:center; justify-content:space-between; }
+  .brand{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; display:flex; align-items:center; gap:8px; }
+  .brand .pt{ font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; color:#0f1115; background:linear-gradient(120deg,var(--amber),#ffcf8a); padding:3px 8px; border-radius:6px; letter-spacing:1px; }
+  .brand .sub{ font-size:10px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace; }
+  .roomtag{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); direction:ltr; }
+  .roomtag b{ color:var(--amber); }
+
+  .panel{ padding:22px 24px; }
+  .panel.hidden{ display:none; }
+
+  .field-label{ font-size:11px; color:var(--ink-dim); margin-bottom:6px; }
+  input{
+    width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line);
+    background:var(--panel-2); color:var(--ink); font-family:'JetBrains Mono',monospace;
+    font-size:14px; direction:ltr; text-align:center; outline:none; letter-spacing:2px;
+  }
+  input:focus{ border-color:var(--amber); box-shadow:0 0 0 3px rgba(240,171,77,0.12); }
+  input::placeholder{ font-family:'Vazirmatn'; color:var(--ink-dim); letter-spacing:0; }
+
+  button.act{
+    width:100%; margin-top:12px; padding:14px 10px; border-radius:14px; border:none;
+    font-family:'Vazirmatn'; font-weight:700; font-size:14px; cursor:pointer;
+    transition:transform 0.15s, filter 0.15s;
+    background:linear-gradient(120deg,var(--teal),#28b596); color:#062019;
+    box-shadow:0 8px 20px -6px rgba(63,224,189,0.5);
+  }
+  button.act:active{ transform:scale(0.97); }
+  button.act.leave{ background:linear-gradient(120deg,var(--red),#c8323a); color:#2b0708; box-shadow:0 8px 20px -6px rgba(239,74,82,0.5); }
+
+  .stage{ display:flex; flex-direction:column; align-items:center; padding:8px 0 4px; }
+  .visualizer-wrap{ position:relative; width:170px; height:170px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  canvas#vizCanvas{ position:absolute; inset:0; width:170px; height:170px; }
+  .ring-core{
+    position:relative; z-index:2; width:86px; height:86px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #232b36, #171b22); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace;
+    font-size:12px; color:var(--ink-dim); box-shadow:inset 0 2px 6px rgba(0,0,0,0.4);
+    user-select:none; touch-action:none;
+  }
+  .ring-core.on{ color:var(--teal); border-color:rgba(63,224,189,0.45); }
+  .ring-core.pttable{ cursor:pointer; }
+  .timer{ font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; color:var(--ink-dim); min-height:16px; }
+  .roomline{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); margin-top:4px; display:flex; gap:10px; align-items:center; }
+  .roomline b{ color:var(--amber); }
+  .copybtn{
+    background:transparent; border:1px solid var(--line); color:var(--ink-dim); border-radius:8px;
+    font-size:10.5px; padding:4px 9px; cursor:pointer; font-family:'JetBrains Mono',monospace;
+  }
+  .copybtn:hover{ border-color:var(--amber); color:var(--amber); }
+
+  .grid-participants{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(90px,1fr)); gap:10px;
+    padding:14px 24px 4px;
+  }
+  .pcard{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:14px;
+    padding:10px 8px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .pring{
+    width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 35% 30%, #232b36, #171b22); border:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:var(--ink-dim);
+    transition:box-shadow 0.08s linear, border-color 0.15s;
+  }
+  .pname{ font-size:11px; color:var(--ink-dim); }
+  .prow{ display:flex; align-items:center; gap:4px; width:100%; }
+  .prow input[type=range]{
+    -webkit-appearance:none; width:100%; height:3px; border-radius:3px; background:var(--line);
+    padding:0; direction:ltr;
+  }
+  .prow input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:11px; height:11px; border-radius:50%; background:var(--teal); cursor:pointer;
+  }
+  .pmute{
+    flex-shrink:0; width:24px; height:24px; border-radius:7px; border:1px solid var(--line);
+    background:transparent; color:var(--ink-dim); cursor:pointer; font-size:11px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pmute.off{ border-color:var(--red); color:var(--red); }
+  .empty-hint{
+    grid-column:1/-1; text-align:center; font-family:'JetBrains Mono',monospace;
+    font-size:11px; color:var(--ink-dim); padding:6px 0;
+  }
+
+  .tools{ padding:16px 24px 6px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  button.tool{
+    padding:11px 6px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--ink); font-family:'Vazirmatn'; font-size:11.5px; font-weight:600; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    transition:border-color .15s, color .15s;
+  }
+  button.tool span.ic{ font-size:16px; }
+  button.tool:disabled{ opacity:0.35; cursor:not-allowed; }
+  button.tool.active{ border-color:var(--amber); color:var(--amber); }
+  button.tool.active-red{ border-color:var(--red); color:var(--red); }
+  button.tool.active-teal{ border-color:var(--teal); color:var(--teal); }
+
+  .pttzone{ padding:0 24px 6px; display:none; }
+  .pttzone.show{ display:block; }
+  .pttbtn{
+    width:100%; padding:16px; border-radius:14px; border:2px dashed var(--line);
+    background:var(--panel-2); color:var(--ink-dim); font-family:'Vazirmatn'; font-weight:700;
+    font-size:13px; text-align:center; user-select:none; touch-action:none; cursor:pointer;
+  }
+  .pttbtn.active-teal{ border-color:var(--teal); color:var(--teal); border-style:solid; }
+
+  .screens{ padding:10px 24px 6px; display:grid; gap:10px; }
+  .screenbox{ border-radius:14px; overflow:hidden; border:1px solid var(--line); background:#000; position:relative; }
+  .screenbox video{ width:100%; display:block; max-height:200px; object-fit:contain; background:#000; }
+  .screenbox .tag{
+    position:absolute; top:8px; right:8px; font-family:'JetBrains Mono',monospace; font-size:10px;
+    background:rgba(0,0,0,0.6); color:var(--ink-dim); padding:3px 7px; border-radius:6px;
+  }
+
+  .status{ margin:4px 24px 20px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); text-align:center; min-height:14px; }
+  .capacity{ margin:0 24px 8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-dim); text-align:center; }
+  audio{ display:none; }
+  @media (prefers-reduced-motion: reduce){ .aurora{animation:none;} .band{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+<div class="grain"></div>
+
+<div class="console">
+  <div class="band"></div>
+
+  <div class="head">
+    <div class="brand">یاکریم کال <span class="pt">PT</span><span class="sub">STUDIO · GROUP</span></div>
+    <div class="roomtag" id="roomTag"></div>
+  </div>
+
+  <!-- ورود به اتاق -->
+  <div class="panel" id="joinPanel">
+    <div class="field-label">کد اتاق (خالی بذار تا خودش بسازه)</div>
+    <input id="roomInput" placeholder="مثلا AB3XQ" maxlength="8" />
+    <button class="act" id="joinBtn">ساخت / ورود به اتاق</button>
+  </div>
+
+  <!-- داخل اتاق -->
+  <div class="panel hidden" id="callPanel">
+    <div class="stage">
+      <div class="visualizer-wrap">
+        <canvas id="vizCanvas" width="170" height="170"></canvas>
+        <div class="ring-core" id="ringCore">متصل</div>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="roomline">
+        اتاق: <b id="roomCodeDisp">-</b> · جایگاه <b id="mySlotDisp">-</b>
+        <button class="copybtn" id="copyLinkBtn">کپی لینک دعوت</button>
+      </div>
+    </div>
+
+    <div class="capacity" id="capacityText">۰ / ۶ نفر متصل</div>
+
+    <div class="grid-participants" id="participantsGrid">
+      <div class="empty-hint" id="emptyHint">منتظر پیوستن بقیه… لینک دعوت رو بفرست</div>
+    </div>
+
+    <div class="tools">
+      <button class="tool" id="muteBtn"><span class="ic">🎙️</span>میکروفون</button>
+      <button class="tool active-teal" id="noiseBtn"><span class="ic">🧹</span>ضدنویز: فعال</button>
+      <button class="tool" id="deafenBtn"><span class="ic">🔕</span>کر کردن همه</button>
+      <button class="tool" id="pttModeBtn"><span class="ic">🗣️</span>حالت بی‌سیم</button>
+      <button class="tool" id="shareBtn"><span class="ic">🖥️</span>اشتراک صفحه</button>
+      <button class="tool" id="recordBtn"><span class="ic">⏺</span>ضبط مکالمه</button>
+    </div>
+
+    <div class="pttzone" id="pttZone">
+      <div class="pttbtn" id="pttHoldBtn">نگه‌دار تا صحبت کنی (بی‌سیم)</div>
+    </div>
+
+    <div class="screens">
+      <div class="screenbox" id="localScreenBox" style="display:none;">
+        <span class="tag">صفحه‌ی من</span>
+        <video id="localScreenVideo" autoplay muted playsinline></video>
+      </div>
+      <div id="remoteScreensWrap"></div>
+    </div>
+
+    <button class="act leave" id="leaveBtn">خروج از اتاق</button>
+  </div>
+
+  <div class="status" id="status">آماده‌ی ساخت اتاق</div>
+</div>
+
+<script>
+const MAX_SLOTS = 6;
+const PEER_OPTS = { host:'0.peerjs.com', port:443, secure:true };
+
+let peer = null, mySlot = null, roomCode = null;
+let micStream = null, localSource = null, localAnalyser = null;
+let noiseCancelOn = true, muted = false, deafened = false;
+let pttMode = false, pttActive = false;
+let screenStream = null, screenCallsOut = {};
+let isRecording = false, mediaRecorder = null, recordedChunks = [], recDestNode = null;
+let audioCtx = null, vizRAF = null;
+let timerInterval = null, secondsElapsed = 0;
+let participants = {}; // slot -> {slot,id,audioCall,remoteStream,audioEl,source,analyser,volume,mutedLocally,el:{ring}}
+
+const roomInput = document.getElementById('roomInput');
+const joinBtn = document.getElementById('joinBtn');
+const joinPanel = document.getElementById('joinPanel');
+const callPanel = document.getElementById('callPanel');
+const roomTag = document.getElementById('roomTag');
+const roomCodeDisp = document.getElementById('roomCodeDisp');
+const mySlotDisp = document.getElementById('mySlotDisp');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+const capacityText = document.getElementById('capacityText');
+const participantsGrid = document.getElementById('participantsGrid');
+const emptyHint = document.getElementById('emptyHint');
+const statusEl = document.getElementById('status');
+const ringCore = document.getElementById('ringCore');
+const timerEl = document.getElementById('timer');
+const canvas = document.getElementById('vizCanvas');
+const ctx2d = canvas.getContext('2d');
+const muteBtn = document.getElementById('muteBtn');
+const noiseBtn = document.getElementById('noiseBtn');
+const deafenBtn = document.getElementById('deafenBtn');
+const pttModeBtn = document.getElementById('pttModeBtn');
+const pttZone = document.getElementById('pttZone');
+const pttHoldBtn = document.getElementById('pttHoldBtn');
+const shareBtn = document.getElementById('shareBtn');
+const recordBtn = document.getElementById('recordBtn');
+const localScreenBox = document.getElementById('localScreenBox');
+const localScreenVideo = document.getElementById('localScreenVideo');
+const remoteScreensWrap = document.getElementById('remoteScreensWrap');
+const leaveBtn = document.getElementById('leaveBtn');
+
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('room')) roomInput.value = urlParams.get('room').toUpperCase();
+
+function generateCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s=''; for(let i=0;i<5;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+
+function ensureAudioCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+
+function micConstraints(){
+  return { audio:{ noiseSuppression:noiseCancelOn, echoCancellation:noiseCancelOn, autoGainControl:noiseCancelOn }, video:false };
+}
+
+async function getMic(){
+  if (!micStream){
+    micStream = await navigator.mediaDevices.getUserMedia(micConstraints());
+    setupLocalAnalyser(micStream);
+  }
+  return micStream;
+}
+
+function setupLocalAnalyser(stream){
+  const c = ensureAudioCtx();
+  localSource = c.createMediaStreamSource(stream);
+  const a = c.createAnalyser(); a.fftSize=64; a.smoothingTimeConstant=0.75;
+  localSource.connect(a);
+  localAnalyser = a;
+  startLevelLoop();
+  if (isRecording) localSource.connect(recDestNode);
+}
+
+function setupParticipantAnalyser(p, stream){
+  const c = ensureAudioCtx();
+  const src = c.createMediaStreamSource(stream);
+  const a = c.createAnalyser(); a.fftSize=64; a.smoothingTimeConstant=0.8;
+  src.connect(a);
+  p.source = src; p.analyser = a;
+  if (isRecording) src.connect(recDestNode);
+}
+
+function startLevelLoop(){
+  if (vizRAF) return;
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2, bars=40, baseR=56;
+  const localData = new Uint8Array(32);
+  const pData = new Uint8Array(32);
+  function frame(){
+    ctx2d.clearRect(0,0,W,H);
+    if (localAnalyser) localAnalyser.getByteFrequencyData(localData);
+    for (let i=0;i<bars;i++){
+      const angle = (i/bars)*Math.PI*2 - Math.PI/2;
+      const idx = i % localData.length;
+      const amp = localAnalyser ? (localData[idx]/255) : 0.05+0.02*Math.sin(Date.now()/700+i);
+      const len = 8 + amp*24;
+      const x1=cx+Math.cos(angle)*baseR, y1=cy+Math.sin(angle)*baseR;
+      const x2=cx+Math.cos(angle)*(baseR+len), y2=cy+Math.sin(angle)*(baseR+len);
+      const grad = ctx2d.createLinearGradient(x1,y1,x2,y2);
+      grad.addColorStop(0,'rgba(63,224,189,0.9)'); grad.addColorStop(1,'rgba(240,171,77,0.9)');
+      ctx2d.strokeStyle = grad; ctx2d.lineWidth=3; ctx2d.lineCap='round';
+      ctx2d.shadowColor='rgba(63,224,189,0.6)'; ctx2d.shadowBlur=6+amp*10;
+      ctx2d.beginPath(); ctx2d.moveTo(x1,y1); ctx2d.lineTo(x2,y2); ctx2d.stroke();
+    }
+    for (const slot in participants){
+      const p = participants[slot];
+      if (!p.analyser || !p.el) continue;
+      p.analyser.getByteFrequencyData(pData);
+      const lvl = pData.reduce((a,b)=>a+b,0)/pData.length;
+      const norm = Math.min(1, lvl/110);
+      p.el.ring.style.boxShadow = `0 0 ${6+norm*22}px ${2+norm*6}px rgba(63,224,189,${0.15+norm*0.5})`;
+      p.el.ring.style.borderColor = norm>0.12 ? 'rgba(63,224,189,0.6)' : 'var(--line)';
+    }
+    vizRAF = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function startTimer(){
+  secondsElapsed = 0;
+  timerInterval = setInterval(()=>{
+    secondsElapsed++;
+    const m=String(Math.floor(secondsElapsed/60)).padStart(2,'0');
+    const s=String(secondsElapsed%60).padStart(2,'0');
+    timerEl.textContent = m+':'+s;
+  },1000);
+}
+function stopTimer(){ clearInterval(timerInterval); timerEl.textContent='00:00'; }
+
+function slugId(code, slot){ return `yak-${code}-${slot}`; }
+function extractSlot(peerId){ const parts = peerId.split('-'); return parseInt(parts[parts.length-1],10); }
+
+function tryRegisterSlot(code, slot){
+  return new Promise((resolve, reject) => {
+    const id = slugId(code, slot);
+    const p = new Peer(id, PEER_OPTS);
+    function cleanup(){ p.off('open', onOpen); p.off('error', onError); }
+    function onOpen(){ cleanup(); resolve(p); }
+    function onError(err){
+      cleanup();
+      if (err && err.type === 'unavailable-id'){ try{p.destroy();}catch(e){}; reject({retry:true}); }
+      else { reject({retry:false, err}); }
+    }
+    p.on('open', onOpen);
+    p.on('error', onError);
+  });
+}
+
+async function joinRoom(code){
+  for (let slot=1; slot<=MAX_SLOTS; slot++){
+    try { const p = await tryRegisterSlot(code, slot); return {peer:p, slot}; }
+    catch(e){ if (e && e.retry) continue; throw (e && e.err) || new Error('join-failed'); }
+  }
+  const full = new Error('room-full'); full.code='room-full'; throw full;
+}
+
+joinBtn.addEventListener('click', async () => {
+  let code = roomInput.value.trim().toUpperCase();
+  if (!code) code = generateCode();
+  statusEl.textContent = 'در حال ورود به اتاق…';
+  joinBtn.disabled = true;
+  try {
+    const {peer:p, slot} = await joinRoom(code);
+    peer = p; mySlot = slot; roomCode = code;
+    onJoined();
+  } catch(e){
+    statusEl.textContent = (e && e.code==='room-full') ? 'اتاق پر است (حداکثر ۶ نفر)' : 'خطا در ورود به اتاق';
+  } finally {
+    joinBtn.disabled = false;
+  }
+});
+
+function onJoined(){
+  joinPanel.classList.add('hidden');
+  callPanel.classList.remove('hidden');
+  roomTag.innerHTML = `اتاق <b>${roomCode}</b>`;
+  roomCodeDisp.textContent = roomCode;
+  mySlotDisp.textContent = mySlot;
+  ringCore.classList.add('on');
+  ringCore.textContent = 'متصل';
+  statusEl.textContent = 'در حال جست‌وجوی همراهان…';
+  startTimer();
+  updateCapacity();
+  renderParticipants();
+
+  peer.on('call', handleIncomingCall);
+  peer.on('error', (err) => {
+    if (err && err.type === 'peer-unavailable') return; // یعنی اون جایگاه خالیه، طبیعیه
+    statusEl.textContent = 'خطا: ' + (err ? err.type : 'نامشخص');
+  });
+
+  getMic().then(() => scanAndCallOthers());
+}
+
+async function scanAndCallOthers(){
+  const stream = await getMic();
+  for (let slot=1; slot<=MAX_SLOTS; slot++){
+    if (slot === mySlot) continue;
+    const id = slugId(roomCode, slot);
+    try {
+      const call = peer.call(id, stream, { metadata:{ type:'audio' } });
+      registerParticipantCall(slot, call);
+    } catch(e) { /* جایگاه خالیه، بی‌خیال */ }
+  }
+}
+
+function handleIncomingCall(call){
+  const meta = call.metadata || {};
+  if (meta.type === 'screen'){
+    call.answer();
+    const fromSlot = meta.fromSlot || extractSlot(call.peer);
+    call.on('stream', stream => addIncomingScreen(fromSlot, stream));
+    call.on('close', () => removeIncomingScreen(fromSlot));
+    return;
+  }
+  const slot = extractSlot(call.peer);
+  getMic().then(stream => {
+    call.answer(stream);
+    registerParticipantCall(slot, call);
+  });
+}
+
+function registerParticipantCall(slot, call){
+  if (participants[slot] && participants[slot].audioCall && participants[slot].audioCall.open){
+    call.close(); return;
+  }
+  const p = participants[slot] || { slot, id: call.peer, volume:1, mutedLocally:false };
+  p.audioCall = call;
+  participants[slot] = p;
+
+  call.on('stream', remoteStream => {
+    p.remoteStream = remoteStream;
+    const audioEl = document.createElement('audio');
+    audioEl.autoplay = true; audioEl.playsInline = true;
+    audioEl.srcObject = remoteStream;
+    audioEl.volume = deafened ? 0 : p.volume;
+    audioEl.muted = p.mutedLocally;
+    document.body.appendChild(audioEl);
+    p.audioEl = audioEl;
+    setupParticipantAnalyser(p, remoteStream);
+    renderParticipants();
+    updateCapacity();
+    statusEl.textContent = '✅ در حال مکالمه';
+    if (screenStream) sendScreenTo(slot);
+  });
+  call.on('close', () => removeParticipant(slot));
+  call.on('error', () => removeParticipant(slot));
+}
+
+function removeParticipant(slot){
+  const p = participants[slot];
+  if (!p) return;
+  if (p.audioEl){ p.audioEl.srcObject=null; p.audioEl.remove(); }
+  delete participants[slot];
+  renderParticipants();
+  updateCapacity();
+}
+
+function updateCapacity(){
+  const count = Object.keys(participants).length + 1;
+  capacityText.textContent = `${count} / ${MAX_SLOTS} نفر متصل`;
+}
+
+function renderParticipants(){
+  const slots = Object.keys(participants).map(Number).sort((a,b)=>a-b);
+  if (slots.length === 0){
+    participantsGrid.innerHTML = '';
+    participantsGrid.appendChild(emptyHint);
+    return;
+  }
+  participantsGrid.innerHTML = '';
+  slots.forEach(slot => {
+    const p = participants[slot];
+    const card = document.createElement('div');
+    card.className = 'pcard';
+    card.innerHTML = `
+      <div class="pring" id="pring-${slot}">${slot}</div>
+      <div class="pname">همراه #${slot}</div>
+      <div class="prow">
+        <input type="range" min="0" max="100" value="${Math.round(p.volume*100)}" class="pvol" data-slot="${slot}">
+        <button class="pmute" data-slot="${slot}">🔊</button>
+      </div>
+    `;
+    participantsGrid.appendChild(card);
+    p.el = { ring: card.querySelector('.pring') };
+
+    card.querySelector('.pvol').addEventListener('input', (e) => {
+      const v = parseInt(e.target.value,10)/100;
+      p.volume = v;
+      if (p.audioEl && !deafened) p.audioEl.volume = v;
+      p.mutedLocally = v === 0;
+      updateMuteBtnUI(slot);
+    });
+    card.querySelector('.pmute').addEventListener('click', () => {
+      p.mutedLocally = !p.mutedLocally;
+      if (p.audioEl) p.audioEl.muted = p.mutedLocally;
+      updateMuteBtnUI(slot);
+    });
+    updateMuteBtnUI(slot);
+  });
+}
+
+function updateMuteBtnUI(slot){
+  const p = participants[slot];
+  if (!p || !p.el) return;
+  const btn = participantsGrid.querySelector(`.pmute[data-slot="${slot}"]`);
+  if (!btn) return;
+  btn.textContent = p.mutedLocally ? '🔇' : '🔊';
+  btn.classList.toggle('off', p.mutedLocally);
+}
+
+copyLinkBtn.addEventListener('click', () => {
+  const url = `${location.origin}${location.pathname}?room=${roomCode}`;
+  navigator.clipboard.writeText(url).then(() => {
+    copyLinkBtn.textContent = 'کپی شد ✓';
+    setTimeout(() => copyLinkBtn.textContent = 'کپی لینک دعوت', 1500);
+  });
+});
+
+// میکروفون
+muteBtn.addEventListener('click', () => {
+  if (!micStream || pttMode) return;
+  muted = !muted;
+  micStream.getAudioTracks().forEach(t => t.enabled = !muted);
+  muteBtn.classList.toggle('active-red', muted);
+  muteBtn.innerHTML = muted ? '<span class="ic">🔇</span>قطع است' : '<span class="ic">🎙️</span>میکروفون';
+});
+
+// ضدنویز
+noiseBtn.addEventListener('click', async () => {
+  noiseCancelOn = !noiseCancelOn;
+  noiseBtn.classList.toggle('active-teal', noiseCancelOn);
+  noiseBtn.classList.toggle('active', !noiseCancelOn);
+  noiseBtn.innerHTML = '<span class="ic">🧹</span>ضدنویز: ' + (noiseCancelOn ? 'فعال' : 'خاموش');
+  if (!micStream) return;
+  try {
+    const newStream = await navigator.mediaDevices.getUserMedia(micConstraints());
+    const newTrack = newStream.getAudioTracks()[0];
+    newTrack.enabled = !muted && !(pttMode && !pttActive);
+    for (const slot in participants){
+      const call = participants[slot].audioCall;
+      if (call && call.peerConnection){
+        const sender = call.peerConnection.getSenders().find(s => s.track && s.track.kind==='audio');
+        if (sender) await sender.replaceTrack(newTrack);
+      }
+    }
+    micStream.getAudioTracks().forEach(t => t.stop());
+    micStream = newStream;
+    setupLocalAnalyser(micStream);
+  } catch(e){ statusEl.textContent = 'تعویض میکروفون ناموفق بود'; }
+});
+
+// کر کردن همه
+deafenBtn.addEventListener('click', () => {
+  deafened = !deafened;
+  deafenBtn.classList.toggle('active-red', deafened);
+  deafenBtn.innerHTML = '<span class="ic">' + (deafened ? '🔕' : '🔔') + '</span>' + (deafened ? 'صدا قطع است' : 'کر کردن همه');
+  for (const slot in participants){
+    const p = participants[slot];
+    if (p.audioEl) p.audioEl.volume = deafened ? 0 : p.volume;
+  }
+});
+
+// حالت بی‌سیم (PTT)
+pttModeBtn.addEventListener('click', () => {
+  pttMode = !pttMode;
+  pttModeBtn.classList.toggle('active-teal', pttMode);
+  pttZone.classList.toggle('show', pttMode);
+  ringCore.classList.toggle('pttable', pttMode);
+  muteBtn.disabled = pttMode;
+  if (micStream){
+    if (pttMode) micStream.getAudioTracks().forEach(t => t.enabled = false);
+    else micStream.getAudioTracks().forEach(t => t.enabled = !muted);
+  }
+});
+function pttOn(){ if (!pttMode || !micStream) return; pttActive=true; micStream.getAudioTracks().forEach(t=>t.enabled=true); pttHoldBtn.classList.add('active-teal'); }
+function pttOff(){ if (!pttMode || !micStream) return; pttActive=false; micStream.getAudioTracks().forEach(t=>t.enabled=false); pttHoldBtn.classList.remove('active-teal'); }
+pttHoldBtn.addEventListener('pointerdown', pttOn);
+['pointerup','pointerleave','pointercancel'].forEach(ev => pttHoldBtn.addEventListener(ev, pttOff));
+ringCore.addEventListener('pointerdown', () => { if (pttMode) pttOn(); });
+['pointerup','pointerleave','pointercancel'].forEach(ev => ringCore.addEventListener(ev, () => { if (pttMode) pttOff(); }));
+
+// اشتراک صفحه برای کل اتاق
+shareBtn.addEventListener('click', async () => {
+  if (screenStream){ stopScreenShare(); return; }
+  try { screenStream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true }); }
+  catch(e){ statusEl.textContent = 'اشتراک صفحه لغو شد'; return; }
+  localScreenVideo.srcObject = screenStream;
+  localScreenBox.style.display = 'block';
+  shareBtn.classList.add('active');
+  shareBtn.innerHTML = '<span class="ic">⏹</span>توقف اشتراک';
+  for (const slot in participants) sendScreenTo(slot);
+  screenStream.getVideoTracks()[0].addEventListener('ended', stopScreenShare);
+});
+function sendScreenTo(slot){
+  const id = slugId(roomCode, slot);
+  const call = peer.call(id, screenStream, { metadata:{ type:'screen', fromSlot:mySlot } });
+  screenCallsOut[slot] = call;
+}
+function stopScreenShare(){
+  if (screenStream){ screenStream.getTracks().forEach(t=>t.stop()); screenStream=null; }
+  Object.values(screenCallsOut).forEach(c => c.close());
+  screenCallsOut = {};
+  localScreenVideo.srcObject = null;
+  localScreenBox.style.display = 'none';
+  shareBtn.classList.remove('active');
+  shareBtn.innerHTML = '<span class="ic">🖥️</span>اشتراک صفحه';
+}
+
+function addIncomingScreen(fromSlot, stream){
+  let box = document.getElementById('rscreen-'+fromSlot);
+  if (!box){
+    box = document.createElement('div');
+    box.className = 'screenbox';
+    box.id = 'rscreen-'+fromSlot;
+    box.innerHTML = `<span class="tag">صفحه‌ی همراه #${fromSlot}</span><video autoplay playsinline></video>`;
+    remoteScreensWrap.appendChild(box);
+  }
+  box.querySelector('video').srcObject = stream;
+}
+function removeIncomingScreen(fromSlot){
+  const box = document.getElementById('rscreen-'+fromSlot);
+  if (box) box.remove();
+}
+
+// ضبط مکالمه (میکس صدای خودم + همه)
+recordBtn.addEventListener('click', () => { isRecording ? stopRecording() : startRecording(); });
+function startRecording(){
+  ensureAudioCtx();
+  recDestNode = audioCtx.createMediaStreamDestination();
+  if (localSource) localSource.connect(recDestNode);
+  Object.values(participants).forEach(p => { if (p.source) p.source.connect(recDestNode); });
+  recordedChunks = [];
+  try {
+    mediaRecorder = new MediaRecorder(recDestNode.stream);
+  } catch(e){ statusEl.textContent = 'ضبط پشتیبانی نمی‌شود'; return; }
+  mediaRecorder.ondataavailable = e => { if (e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type:'audio/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `yakarim-call-${Date.now()}.webm`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  };
+  mediaRecorder.start();
+  isRecording = true;
+  recordBtn.classList.add('active-red');
+  recordBtn.innerHTML = '<span class="ic">⏺</span>در حال ضبط…';
+}
+function stopRecording(){
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  isRecording = false;
+  recordBtn.classList.remove('active-red');
+  recordBtn.innerHTML = '<span class="ic">⏺</span>ضبط مکالمه';
+}
+
+// خروج از اتاق
+leaveBtn.addEventListener('click', () => {
+  Object.keys(participants).forEach(slot => {
+    if (participants[slot].audioCall) participants[slot].audioCall.close();
+  });
+  stopScreenShare();
+  if (isRecording) stopRecording();
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  if (peer) { try{ peer.destroy(); }catch(e){} }
+  participants = {}; micStream=null; localSource=null; localAnalyser=null;
+  peer=null; mySlot=null; roomCode=null;
+  stopTimer();
+  remoteScreensWrap.innerHTML = '';
+  callPanel.classList.add('hidden');
+  joinPanel.classList.remove('hidden');
+  roomTag.textContent = '';
+  ringCore.classList.remove('on');
+  statusEl.textContent = 'از اتاق خارج شدی';
+});
+</script>
+
+</body>
+</html>
