@@ -163,10 +163,18 @@
   .screens{ padding:10px 24px 6px; display:grid; gap:10px; }
   .screenbox{ border-radius:14px; overflow:hidden; border:1px solid var(--line); background:#000; position:relative; }
   .screenbox video{ width:100%; display:block; max-height:200px; object-fit:contain; background:#000; }
+  .screenbox:fullscreen video, .screenbox:-webkit-full-screen video{ max-height:100vh; height:100vh; }
   .screenbox .tag{
     position:absolute; top:8px; right:8px; font-family:'JetBrains Mono',monospace; font-size:10px;
     background:rgba(0,0,0,0.6); color:var(--ink-dim); padding:3px 7px; border-radius:6px;
   }
+  .screenbox .sb-actions{ position:absolute; top:8px; left:8px; display:flex; gap:6px; z-index:3; }
+  .screenbox .sb-actions button{
+    background:rgba(0,0,0,0.6); border:1px solid var(--line); color:var(--ink); width:28px; height:28px;
+    border-radius:8px; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center;
+  }
+  .screenbox .sb-actions button:hover{ border-color:var(--teal); color:var(--teal); }
+  .screenbox .sb-actions button.unmute-needed{ border-color:var(--amber); color:var(--amber); }
 
   .status{ margin:4px 24px 20px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-dim); text-align:center; min-height:14px; }
   .capacity{ margin:0 24px 8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-dim); text-align:center; }
@@ -236,6 +244,7 @@
     <div class="screens">
       <div class="screenbox" id="localScreenBox" style="display:none;">
         <span class="tag">صفحه‌ی من</span>
+        <div class="sb-actions"><button id="localScreenFsBtn" title="تمام‌صفحه">⛶</button></div>
         <video id="localScreenVideo" autoplay muted playsinline></video>
       </div>
       <div id="remoteScreensWrap"></div>
@@ -288,6 +297,7 @@ const shareBtn = document.getElementById('shareBtn');
 const recordBtn = document.getElementById('recordBtn');
 const localScreenBox = document.getElementById('localScreenBox');
 const localScreenVideo = document.getElementById('localScreenVideo');
+const localScreenFsBtn = document.getElementById('localScreenFsBtn');
 const remoteScreensWrap = document.getElementById('remoteScreensWrap');
 const leaveBtn = document.getElementById('leaveBtn');
 
@@ -378,10 +388,27 @@ function startTimer(){
 }
 function stopTimer(){ clearInterval(timerInterval); timerEl.textContent='00:00'; }
 
-// اسم اتاق (هر متنی، حتی فارسی) رو به یه شناسه‌ی امن و یکسان برای PeerJS تبدیل می‌کنیم
+// اسم اتاق (هر متنی، حتی فارسی) رو به یه شناسه‌ی امن و یکسان برای PeerJS تبدیل می‌کنیم.
+// نکته‌ی مهم: کیبورد فارسی گوشی‌ها خیلی وقت‌ها یه نویسه‌ی نامرئی (نیم‌فاصله ZWNJ) یا فاصله‌ی
+// اضافه بین حروف اضافه می‌کنه، یا حرف «ي»/«ك» عربی به‌جای «ی»/«ک» فارسی تایپ می‌شه — این باعث
+// می‌شد دو نفر که فکر می‌کردن اسم یکسانی نوشتن، عملاً وارد دو اتاق کاملاً متفاوت بشن.
+// اینجا همه‌ی این حالت‌ها رو یکسان‌سازی می‌کنیم تا همیشه به یه نتیجه‌ی یکسان برسن.
+function normalizeRoomName(raw){
+  return raw
+    .normalize('NFKC')
+    .replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '')   // نیم‌فاصله، فاصله‌ی صفر-عرض، BOM، فاصله‌ی سخت
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '') // اعراب/تشدید عربی-فارسی
+    .replace(/[ي]/g, 'ی').replace(/[ك]/g, 'ک')          // حروف عربی -> معادل فارسی
+    .replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)) // اعداد عربی -> لاتین
+    .replace(/[۰۱۲۳۴۵۶۷۸۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)) // اعداد فارسی -> لاتین
+    .replace(/\s+/g, '')                                 // حذف کامل فاصله‌ها (وسط و کنار)
+    .toLowerCase()
+    .trim();
+}
 function slugifyRoom(raw){
+  const norm = normalizeRoomName(raw);
   let hash = 0;
-  for (let i=0;i<raw.length;i++){ hash = (hash*31 + raw.charCodeAt(i)) >>> 0; }
+  for (let i=0;i<norm.length;i++){ hash = (hash*31 + norm.charCodeAt(i)) >>> 0; }
   return 'r' + hash.toString(36);
 }
 function slugId(roomSlug, slot){ return `yak-${roomSlug}-${slot}`; }
@@ -416,7 +443,7 @@ joinBtn.addEventListener('click', async () => {
   if (!name){ statusEl.textContent = 'اول یه اسم برای خودت وارد کن'; return; }
   if (!rawRoom){ statusEl.textContent = 'یه اسم برای اتاق انتخاب کن'; return; }
   myName = name;
-  const roomSlug = slugifyRoom(rawRoom.toLowerCase());
+  const roomSlug = slugifyRoom(rawRoom);
   statusEl.textContent = 'در حال ورود به اتاق…';
   joinBtn.disabled = true;
   try {
@@ -460,20 +487,23 @@ function onJoined(){
 }
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-const roomSlugFor = () => slugifyRoom(roomCode.toLowerCase());
+const roomSlugFor = () => slugifyRoom(roomCode);
 
 async function scanAndCallOthers(){
   const stream = await getMic();
   const roomSlug = roomSlugFor();
   for (let slot=1; slot<=MAX_SLOTS; slot++){
     if (slot === mySlot) continue;
-    if (participants[slot] && participants[slot].connected) continue; // قبلاً وصل شدیم، دوباره لازم نیست
+    const existing = participants[slot];
+    if (existing && (existing.connected || existing.dialInFlight)) continue; // در حال وصله یا وصل شده، دوباره زنگ نزن
     const id = slugId(roomSlug, slot);
     try {
       const call = peer.call(id, stream, { metadata:{ type:'audio', name:myName } });
       trackPendingCall(slot, call);
-      const dconn = peer.connect(id, { reliable:true });
-      trackPendingData(slot, dconn);
+      if (!existing || !existing.dataInFlight){
+        const dconn = peer.connect(id, { reliable:true });
+        trackPendingData(slot, dconn);
+      }
     } catch(e) { /* جایگاه خالیه، بی‌خیال */ }
   }
 }
@@ -501,18 +531,21 @@ function handleIncomingData(dconn){
 
 function ensureParticipant(slot){
   if (!participants[slot]){
-    participants[slot] = { slot, name:'همراه #'+slot, volume:1, mutedLocally:false, connected:false };
+    participants[slot] = { slot, name:'همراه #'+slot, volume:1, mutedLocally:false, connected:false, dialInFlight:false, dataInFlight:false };
   }
   return participants[slot];
 }
 
-// یک تماس تا وقتی که واقعاً stream نده، جزو «شرکت‌کننده‌ی متصل» حساب نمی‌شه — این باعث می‌شد شمارش اشتباه بشه
+// یک تماس تا وقتی که واقعاً stream نده، جزو «شرکت‌کننده‌ی متصل» حساب نمی‌شه — این باعث می‌شد شمارش اشتباه بشه.
+// همچنین تا وقتی یه تماس در حال برقراریه (dialInFlight)، دوباره باهاش تماس نمی‌گیریم تا اتصال‌های تکراری و ناپایدار پیش نیاد.
 function trackPendingCall(slot, call){
   const p = ensureParticipant(slot);
   if (p.audioCall && p.audioCall !== call && p.connected){ call.close(); return; }
   p.audioCall = call;
+  p.dialInFlight = true;
   call.on('stream', remoteStream => {
     p.connected = true;
+    p.dialInFlight = false;
     p.remoteStream = remoteStream;
     if (!p.audioEl){
       const audioEl = document.createElement('audio');
@@ -529,14 +562,17 @@ function trackPendingCall(slot, call){
     statusEl.textContent = '✅ در حال مکالمه';
     if (screenStream) sendScreenTo(slot);
   });
-  call.on('close', () => removeParticipant(slot));
-  call.on('error', () => removeParticipant(slot));
+  call.on('close', () => { p.dialInFlight = false; if (p.connected) removeParticipant(slot); });
+  call.on('error', () => { p.dialInFlight = false; if (p.connected) removeParticipant(slot); });
 }
 function trackPendingData(slot, dconn){
   const p = ensureParticipant(slot);
   if (p.dataConn && p.dataConn.open) return;
   p.dataConn = dconn;
-  dconn.on('open', () => { dconn.send({ type:'hello', name: myName }); });
+  p.dataInFlight = true;
+  dconn.on('open', () => { p.dataInFlight = false; dconn.send({ type:'hello', name: myName }); });
+  dconn.on('close', () => { p.dataInFlight = false; });
+  dconn.on('error', () => { p.dataInFlight = false; });
   dconn.on('data', payload => {
     if (payload && payload.type === 'hello' && payload.name){
       p.name = payload.name;
@@ -687,8 +723,20 @@ ringCore.addEventListener('pointerdown', () => { if (pttMode) pttOn(); });
 // اشتراک صفحه برای کل اتاق
 shareBtn.addEventListener('click', async () => {
   if (screenStream){ stopScreenShare(); return; }
-  try { screenStream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true }); }
-  catch(e){ statusEl.textContent = 'اشتراک صفحه لغو شد'; return; }
+  if (!navigator.mediaDevices.getDisplayMedia){
+    statusEl.textContent = 'این مرورگر اشتراک صفحه رو پشتیبانی نمی‌کنه (مخصوصاً سافاری آیفون)';
+    return;
+  }
+  try {
+    // اول با صدا امتحان می‌کنیم؛ خیلی از مرورگرهای موبایل صدا رو پشتیبانی نمی‌کنن، پس اگه رد کرد بدون صدا هم امتحان می‌کنیم
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true });
+    } catch(innerErr) {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video:true });
+      statusEl.textContent = 'اشتراک صفحه بدون صدا شروع شد (این دستگاه صدای سیستم رو پشتیبانی نمی‌کنه)';
+    }
+  } catch(e){ statusEl.textContent = 'اشتراک صفحه لغو شد'; return; }
+
   localScreenVideo.srcObject = screenStream;
   localScreenBox.style.display = 'block';
   shareBtn.classList.add('active');
@@ -696,6 +744,12 @@ shareBtn.addEventListener('click', async () => {
   Object.keys(participants).filter(s=>participants[s].connected).forEach(slot => sendScreenTo(slot));
   screenStream.getVideoTracks()[0].addEventListener('ended', stopScreenShare);
 });
+localScreenFsBtn.addEventListener('click', () => requestBoxFullscreen(localScreenBox));
+
+function requestBoxFullscreen(box){
+  const req = box.requestFullscreen || box.webkitRequestFullscreen || box.msRequestFullscreen;
+  if (req) req.call(box);
+}
 function sendScreenTo(slot){
   const id = slugId(roomSlugFor(), slot);
   const call = peer.call(id, screenStream, { metadata:{ type:'screen', fromSlot:mySlot } });
@@ -718,10 +772,39 @@ function addIncomingScreen(fromSlot, stream){
     box.className = 'screenbox';
     box.id = 'rscreen-'+fromSlot;
     const label = (participants[fromSlot] && participants[fromSlot].name) || ('همراه #'+fromSlot);
-    box.innerHTML = `<span class="tag">صفحه‌ی ${escapeHtml(label)}</span><video autoplay playsinline></video>`;
+    box.innerHTML = `
+      <span class="tag">صفحه‌ی ${escapeHtml(label)}</span>
+      <div class="sb-actions">
+        <button class="fs-btn" title="تمام‌صفحه">⛶</button>
+        <button class="unmute-btn" title="فعال کردن صدا" style="display:none;">🔇</button>
+      </div>
+      <video autoplay playsinline></video>`;
     remoteScreensWrap.appendChild(box);
+    box.querySelector('.fs-btn').addEventListener('click', () => requestBoxFullscreen(box));
+    box.querySelector('.unmute-btn').addEventListener('click', (e) => {
+      const vid = box.querySelector('video');
+      vid.muted = false;
+      vid.play().then(()=>{ e.target.style.display='none'; }).catch(()=>{});
+    });
   }
-  box.querySelector('video').srcObject = stream;
+  const video = box.querySelector('video');
+  // برای اینکه بدون رفرش صفحه هم بلافاصله پخش بشه: اول بی‌صدا پخش می‌کنیم (مرورگرها معمولاً این رو مسدود نمی‌کنن)
+  // و بلافاصله سعی می‌کنیم صداش رو هم فعال کنیم؛ اگه مرورگر اجازه نداد، دکمه‌ی «فعال کردن صدا» نشون داده می‌شه
+  video.muted = true;
+  video.srcObject = stream;
+  const playPromise = video.play();
+  if (playPromise && playPromise.then){
+    playPromise.then(() => {
+      video.muted = false;
+      const unplay = video.play();
+      if (unplay && unplay.catch){
+        unplay.catch(() => { video.muted = true; box.querySelector('.unmute-btn').style.display='flex'; box.querySelector('.unmute-btn').classList.add('unmute-needed'); });
+      }
+    }).catch(() => {
+      box.querySelector('.unmute-btn').style.display='flex';
+      box.querySelector('.unmute-btn').classList.add('unmute-needed');
+    });
+  }
 }
 function removeIncomingScreen(fromSlot){
   const box = document.getElementById('rscreen-'+fromSlot);
