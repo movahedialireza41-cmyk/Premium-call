@@ -21,7 +21,7 @@
   --font-display:'Space Grotesk',system-ui,sans-serif; --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
 *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
-html,body{ height:100%; height:100dvh; }
+html,body{ height:100%; }
 body{
   background:var(--void); color:var(--text-0); font-family:var(--font-body);
   overflow:hidden; -webkit-font-smoothing:antialiased;
@@ -66,7 +66,7 @@ input{ font-family:inherit; color:inherit; }
 .btn[disabled]{ opacity:.5; pointer-events:none; }
 
 /* ---------- JOIN SCREEN ---------- */
-#screen-join{ height:100vh; height:100dvh; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+#screen-join{ height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
 .join-card{ width:min(430px,100%); padding:36px 30px; }
 .join-card .brand{ margin-bottom:26px; }
 .join-card h1{ font-family:var(--font-display); font-size:23px; margin-bottom:6px; }
@@ -85,13 +85,12 @@ input{ font-family:inherit; color:inherit; }
   border:1px solid var(--glass-border); margin-bottom:16px; display:flex; align-items:center; justify-content:center;
 }
 .preview-box video{ width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
-.preview-avatar{ position:absolute; inset:0; margin:auto; width:64px; height:64px; border-radius:50%; display:none; place-items:center; font-weight:700; font-size:20px; background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; font-family:var(--font-display); z-index:2; }
-.preview-box.cam-off .preview-avatar{ display:grid; }
-.preview-box.cam-off video{ visibility:hidden; }
+.preview-avatar{ width:64px; height:64px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:20px; background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; font-family:var(--font-display); }
 .preview-controls{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
 .mini-tool{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:#fff; transition:background .2s, transform .2s var(--ease-spring); }
 .mini-tool:hover{ transform:translateY(-2px); }
 .mini-tool.off{ background:rgba(251,85,104,.85); }
+.mini-tool:disabled, .tool-btn:disabled{ opacity:.35; pointer-events:none; }
 .join-status{ font-family:var(--font-mono); font-size:11.5px; color:var(--text-3); text-align:center; margin-top:14px; min-height:16px; }
 .join-status.warn{ color:var(--amber); }
 .join-status.err{ color:var(--red); }
@@ -99,11 +98,11 @@ input{ font-family:inherit; color:inherit; }
 .tips{ margin-top:18px; font-size:11.5px; color:var(--text-3); line-height:1.6; }
 
 /* ---------- CALL SCREEN ---------- */
-#screen-call{ display:none; flex-direction:column; height:100vh; height:100dvh; }
+#screen-call{ display:none; flex-direction:column; height:100vh; }
 #screen-call.active{ display:flex; }
 #screen-join.hidden{ display:none; }
 
-.call-topbar{ display:flex; align-items:center; gap:14px; padding:14px 18px; padding-top:calc(14px + env(safe-area-inset-top)); flex-shrink:0; flex-wrap:wrap; }
+.call-topbar{ display:flex; align-items:center; gap:14px; padding:14px 18px; flex-shrink:0; }
 .id-chip{ display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:var(--radius-pill); background:var(--glass-fill-strong); border:1px solid var(--glass-border-strong); font-family:var(--font-mono); font-size:12px; }
 .live-dot{ width:7px; height:7px; border-radius:50%; background:var(--red); box-shadow:0 0 8px var(--red); animation:pulse 1.6s infinite; }
 @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(251,85,104,.6)} 70%{box-shadow:0 0 0 8px rgba(251,85,104,0)} 100%{box-shadow:0 0 0 0 rgba(251,85,104,0)} }
@@ -124,9 +123,7 @@ input{ font-family:inherit; color:inherit; }
 .video-tile video{ width:100%; height:100%; object-fit:cover; }
 .video-tile.self video{ transform:scaleX(-1); }
 .video-tile.speaking{ box-shadow:0 0 0 2.5px var(--cyan), 0 0 30px -6px var(--cyan); }
-.tile-avatar-fallback{ position:absolute; inset:0; margin:auto; width:56px; height:56px; border-radius:50%; display:none; place-items:center; font-weight:700; font-size:18px; color:#fff; font-family:var(--font-display); background:linear-gradient(135deg,var(--blue),var(--purple)); z-index:2; }
-.video-tile.cam-off .tile-avatar-fallback{ display:grid; }
-.video-tile.cam-off video{ visibility:hidden; }
+.tile-avatar-fallback{ width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:18px; color:#fff; font-family:var(--font-display); background:linear-gradient(135deg,var(--blue),var(--purple)); }
 .tile-label{ position:absolute; bottom:9px; left:11px; font-size:11.5px; color:#fff; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.35); padding:4px 10px; border-radius:var(--radius-pill); backdrop-filter:blur(6px); }
 .tile-mute-ic{ position:absolute; bottom:9px; right:9px; width:20px; height:20px; border-radius:50%; background:rgba(251,85,104,.85); display:none; place-items:center; }
 .tile-mute-ic.show{ display:grid; }
@@ -194,7 +191,7 @@ input{ font-family:inherit; color:inherit; }
 .host-actions{ display:flex; gap:8px; margin-bottom:10px; }
 
 /* toolbar */
-.call-toolbar{ display:flex; align-items:center; justify-content:center; gap:16px; padding:14px 16px 18px; padding-bottom:calc(18px + env(safe-area-inset-bottom)); flex-shrink:0; flex-wrap:wrap; }
+.call-toolbar{ display:flex; align-items:center; justify-content:center; gap:16px; padding:14px 16px 18px; flex-shrink:0; flex-wrap:wrap; }
 .toolbar-group{ display:flex; align-items:center; gap:6px; background:var(--glass-fill-strong); border:1px solid var(--glass-border-strong); padding:6px; border-radius:var(--radius-pill); backdrop-filter:blur(18px); }
 .tool-btn{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; color:var(--text-2); transition:background .2s, color .2s, transform .18s var(--ease-spring); }
 .tool-btn:hover{ background:rgba(255,255,255,.08); color:var(--text-0); transform:translateY(-2px); }
@@ -210,16 +207,15 @@ input{ font-family:inherit; color:inherit; }
 .reactions-picker button:hover{ transform:scale(1.3); background:var(--glass-fill); }
 
 .toast-stack{ position:fixed; top:16px; right:16px; z-index:9000; display:flex; flex-direction:column; gap:8px; width:min(320px, calc(100vw - 32px)); }
-.toast{ padding:12px 14px; border-radius:14px; background:var(--surface-1); border:1px solid var(--glass-border-strong); font-size:12.5px; animation:toastIn .3s var(--ease-spring); box-shadow:0 12px 36px -12px rgba(0,0,0,.6); }
-.toast b{ display:block; margin-bottom:2px; font-size:13px; } .toast p{ color:var(--text-2); font-size:11.5px; }
-@keyframes toastIn{ from{opacity:0; transform:translateX(24px);} to{opacity:1; transform:translateX(0);} }
-
 .credit-footer{
   position:fixed; left:50%; bottom:8px; transform:translateX(-50%); z-index:5000;
   font-family:var(--font-mono); font-size:10.5px; letter-spacing:.3px; color:var(--text-3);
   background:rgba(10,12,24,.5); backdrop-filter:blur(6px); padding:4px 12px; border-radius:var(--radius-pill);
   border:1px solid var(--glass-border); pointer-events:none; direction:ltr;
 }
+.toast{ padding:12px 14px; border-radius:14px; background:var(--surface-1); border:1px solid var(--glass-border-strong); font-size:12.5px; animation:toastIn .3s var(--ease-spring); box-shadow:0 12px 36px -12px rgba(0,0,0,.6); }
+.toast b{ display:block; margin-bottom:2px; font-size:13px; } .toast p{ color:var(--text-2); font-size:11.5px; }
+@keyframes toastIn{ from{opacity:0; transform:translateX(24px);} to{opacity:1; transform:translateX(0);} }
 
 @media (max-width:720px){
   .credit-footer{ font-size:9.5px; padding:3px 10px; bottom:6px; }
@@ -229,10 +225,6 @@ input{ font-family:inherit; color:inherit; }
   .tool-btn{ width:40px; height:40px; }
   .end-call-btn{ width:48px; height:48px; }
   .join-card{ padding:26px 20px; }
-  .call-stage{ padding:6px 8px; }
-  .call-topbar{ padding:10px 10px; padding-top:calc(10px + env(safe-area-inset-top)); gap:8px; }
-  .video-grid{ gap:6px; }
-  .id-chip, .timer-chip{ font-size:11px; padding:6px 10px; }
 }
 </style>
 </head>
@@ -249,10 +241,10 @@ input{ font-family:inherit; color:inherit; }
       <svg viewBox="0 0 40 40" class="brand-mark"><circle class="ring r1" cx="20" cy="20" r="17.5"/><circle class="ring r2" cx="20" cy="20" r="11"/><circle class="core" cx="20" cy="20" r="4.5"/></svg>
       <span class="brand-word">یاکریم <span>کال پیتی</span></span>
     </div>
-    <h1 id="joinHeading">Group Call</h1>
+    <h1 id="joinHeading">تماس گروهی واقعی</h1>
     <p class="sub" id="joinSub">اسمتو بنویس، دوربینتو چک کن، و یک روم بساز یا وارد روم دوستت شو. لینک رو کپی کن و برای بقیه بفرست.</p>
 
-    <div class="preview-box cam-off">
+    <div class="preview-box">
       <video id="previewVideo" autoplay muted playsinline></video>
       <div class="preview-avatar" id="previewAvatar">YO</div>
       <div class="preview-controls">
@@ -368,13 +360,7 @@ input{ font-family:inherit; color:inherit; }
 </section>
 
 <!-- PeerJS — free public cloud broker, used ONLY for signaling (exchanging connection info). -->
-<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
-<script>
-  // Fallback CDN in case unpkg is blocked/slow for this network — jsdelivr mirrors the same npm package.
-  if (typeof Peer === 'undefined') {
-    document.write('<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"><\/script>');
-  }
-</script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -386,83 +372,48 @@ input{ font-family:inherit; color:inherit; }
 
 const $ = (s, c = document) => c.querySelector(s);
 const $all = (s, c = document) => Array.from(c.querySelectorAll(s));
-/* Works for both real DOM elements (addEventListener) AND PeerJS objects
-   (Peer / DataConnection / MediaConnection), which are EventEmitters and
-   only expose .on(). Using addEventListener on those used to throw and
-   silently kill the rest of the join/call flow — this is the fix. */
-const on = (el, ev, fn) => {
-  if (!el) return;
-  if (typeof el.addEventListener === 'function') el.addEventListener(ev, fn);
-  else if (typeof el.on === 'function') el.on(ev, fn);
-};
+const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
 const pad2 = n => String(n).padStart(2, '0');
 const escapeHTML = s => (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const randId = (len = 6) => Array.from({ length: len }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
 const initialsOf = name => (name || 'You').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('') || 'YO';
-/* A room code becomes part of a PeerJS peer ID, which travels in a URL path
-   to the signaling server — Persian/Arabic digits, spaces, or symbols in it
-   would silently break connecting. Normalize to plain A-Z0-9 only. */
-const sanitizeRoomCode = s => (s || '')
-  .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-  .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-  .toUpperCase()
-  .replace(/[^A-Z0-9]/g, '')
-  .slice(0, 12);
 
-/* ---------------- ICE servers: public STUN + free public TURN servers for NAT traversal ----------------
-   Two independent free TURN sources are combined so a single provider going down/rate-limiting
-   doesn't take down calling entirely:
-   1) A static, no-auth TURN (Open Relay) — works most of the time, zero setup, zero delay.
-   2) A freshly-fetched TURN credential from a second free provider (elixir-webrtc.org's public
-      test deployment) — fetched at page load so it's ready by the time someone clicks Join.
-   If networks/CDNs change again in the future, only this block needs updating. */
+/* ---------------- ICE servers: multiple public STUN + free public TURN relays for better NAT/firewall traversal.
+   Having several independent relays means that if one is down or blocked on a given network, others can still work. ---------------- */
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun2.l.google.com:19302' },
-  { urls: 'stun:stun3.l.google.com:19302' },
-  { urls: 'stun:stun4.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
   { urls: 'stun:global.stun.twilio.com:3478' },
   { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
   { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
   { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:relay1.expressturn.com:3478', username: 'ef4L5RQ7GNCDNJ2SBK', credential: 'gKHzHkCzr3jXNHy3' },
 ];
-
-// Second, independent free TURN source — fetched once at page load, non-blocking.
-let dynamicIceServers = [];
-const dynamicIceReady = (async () => {
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 4000);
-    const res = await fetch('https://turn.elixir-webrtc.org/?service=turn&username=ykp' + randId(8), { method: 'POST', signal: ctrl.signal });
-    clearTimeout(timer);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && Array.isArray(data.uris) && data.username && data.password) {
-      dynamicIceServers = data.uris.map(uri => ({ urls: uri, username: data.username, credential: data.password }));
-    }
-  } catch { /* second TURN source unavailable — the static one above still covers us */ }
-})();
-
-/* Builds a fresh RTCConfiguration each time a Peer connection is created, so it always
-   includes the dynamic TURN credentials if they've arrived by then. */
-function buildRtcConfig() {
-  return { iceServers: [...ICE_SERVERS, ...dynamicIceServers], iceCandidatePoolSize: 4 };
-}
+const MAX_SLOTS = 8; // حداکثر ظرفیت هر روم (mesh-topology هرچی بیشتر بشه، بار روی اینترنت هر نفر بیشتر می‌شه)
 
 const S = {
-  peer: null, myId: null, myName: 'You',
-  roomCode: null, hostId: null, isHost: false,
+  peer: null, myId: null, mySlot: null, myName: 'You',
+  roomCode: null, roomSlug: null,
   localStream: null, screenStream: null, micOn: true, camOn: true,
-  roster: new Map(),          // id -> {id, name, camOn}
-  dataConns: new Map(),       // id -> DataConnection (host<->guest links)
-  mediaCalls: new Map(),      // id -> MediaConnection
-  remoteStreams: new Map(),   // id -> MediaStream
-  startedAt: null, timerHandle: null,
+  hasAudio: false, hasVideo: false,
+  roster: new Map(),          // slot -> {id, slot, name, connected, dialInFlight, dataInFlight}
+  dataConns: new Map(),       // slot -> DataConnection
+  mediaCalls: new Map(),      // slot -> MediaConnection
+  remoteStreams: new Map(),   // slot -> MediaStream
+  startedAt: null, timerHandle: null, rescanTimers: [],
   chatUnread: 0, locked: false,
 };
+function currentHostSlot() {
+  let min = S.mySlot;
+  S.roster.forEach(p => { if (p.connected && p.slot < min) min = p.slot; });
+  return min;
+}
+function amIHost() {
+  // «هاست» فقط یک برچسب نمایشی برای قدیمی‌ترین عضو حاضره (کمترین شماره‌ی جایگاه) — هیچ نقطه‌ی تک‌شکستی نیست،
+  // اگه همون نفر هم بره، بقیه بدون وقفه به کارشون ادامه می‌دن.
+  return S.mySlot === currentHostSlot();
+}
 
 /* ---------------------------------------------------------------------
    Toasts
@@ -479,57 +430,73 @@ function toast(title, body = '', duration = 4000) {
 /* ---------------------------------------------------------------------
    Join screen: camera/mic preview
 --------------------------------------------------------------------- */
-async function acquireLocalMedia() {
-  const attempts = [
-    { video: { facingMode: 'user' }, audio: true },
-    { audio: true },
-    { video: { facingMode: 'user' } },
-  ];
-  for (const constraints of attempts) {
-    try { return await navigator.mediaDevices.getUserMedia(constraints); }
-    catch { /* try the next, more modest, combination */ }
-  }
-  return null;
+/* یکی از رایج‌ترین دلایل «صدا نمی‌ره»: وقتی دوربین و میکروفون با هم تو یک درخواست خواسته می‌شن،
+   اگه فقط دوربین مشکل داشته باشه (مثلاً یه برنامه‌ی دیگه ازش استفاده می‌کنه)، کل درخواست رد می‌شه
+   و اون آدم بدون هیچ صدایی وارد تماس می‌شه، بدون اینکه خودش بفهمه. اینجا هر کدوم رو جدا و با
+   عقب‌نشینی امتحان می‌کنیم تا حداکثر چیزی که واقعاً در دسترسه رو بگیریم. */
+async function getBestAvailableMedia() {
+  try { return await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); } catch (e) {}
+  try {
+    const audioOnly = await navigator.mediaDevices.getUserMedia({ audio: true });
+    return audioOnly;
+  } catch (e) {}
+  try {
+    const videoOnly = await navigator.mediaDevices.getUserMedia({ video: true });
+    return videoOnly;
+  } catch (e) {}
+  return new MediaStream(); // نه دوربین نه میکروفون — ولی حداقل می‌تونه صدای بقیه رو بشنوه و چت/ری‌اکشن بفرسته
 }
 
 async function initPreview() {
   const params = new URLSearchParams(location.search);
   const roomFromUrl = params.get('room');
   if (roomFromUrl) {
-    $('#roomInput').value = sanitizeRoomCode(roomFromUrl);
+    $('#roomInput').value = roomFromUrl.toUpperCase();
     $('#joinHeading').textContent = 'ملحق شدن به تماس';
     $('#joinSub').textContent = 'داری به یک روم موجود وصل می‌شی. اسمتو بنویس و وارد شو.';
   }
   $('#previewAvatar').textContent = initialsOf($('#nameInput').value);
   on($('#nameInput'), 'input', () => { $('#previewAvatar').textContent = initialsOf($('#nameInput').value); });
 
-  const stream = await acquireLocalMedia();
-  if (stream) {
+  try {
+    const stream = await getBestAvailableMedia();
     S.localStream = stream;
-    $('#previewVideo').srcObject = stream;
-    S.camOn = stream.getVideoTracks().length > 0;
-    S.micOn = stream.getAudioTracks().length > 0;
-    $('.preview-box').classList.toggle('cam-off', !S.camOn);
-    $('#previewMicBtn').classList.toggle('off', !S.micOn);
-    $('#previewCamBtn').classList.toggle('off', !S.camOn);
-    if (!S.camOn) setJoinStatus('دوربین در دسترس نیست — با صدا وارد می‌شی.', 'warn');
-  } else {
-    S.camOn = false; S.micOn = false;
+    S.hasVideo = stream.getVideoTracks().length > 0;
+    S.hasAudio = stream.getAudioTracks().length > 0;
+    if (S.hasVideo) {
+      $('#previewVideo').srcObject = stream;
+      $('#previewAvatar').style.display = 'none';
+      $('#previewCamBtn').classList.add('on');
+    } else {
+      $('#previewCamBtn').classList.add('off');
+      $('#previewCamBtn').disabled = true;
+      $('#camBtn').disabled = true;
+      $('#camBtn').title = 'دوربین در دسترس نیست';
+    }
+    if (S.hasAudio) {
+      $('#previewMicBtn').classList.add('on');
+    } else {
+      $('#previewMicBtn').classList.add('off');
+      $('#previewMicBtn').disabled = true;
+      $('#micBtn').disabled = true;
+      $('#micBtn').title = 'میکروفون در دسترس نیست';
+    }
+    if (!S.hasAudio && !S.hasVideo) {
+      setJoinStatus('دوربین و میکروفون در دسترس نیستن — می‌تونی بدون اون‌ها هم وارد بشی (فقط پیام و ری‌اکشن).', 'warn');
+    } else if (!S.hasAudio) {
+      setJoinStatus('میکروفون در دسترس نیست — بقیه صدات رو نمی‌شنون.', 'warn');
+    }
+  } catch (err) {
     setJoinStatus('دوربین یا میکروفون در دسترس نیست — می‌تونی بدون اون‌ها هم وارد بشی.', 'warn');
   }
   on($('#previewMicBtn'), 'click', () => toggleLocalTrack('audio', $('#previewMicBtn')));
   on($('#previewCamBtn'), 'click', () => {
     toggleLocalTrack('video', $('#previewCamBtn'));
-    $('.preview-box').classList.toggle('cam-off', !S.camOn);
+    $('#previewAvatar').style.display = S.camOn ? 'none' : 'grid';
   });
 }
 function toggleLocalTrack(kind, btn) {
-  if (!S.localStream) {
-    const turningOn = btn.classList.contains('off');
-    btn.classList.toggle('off', !turningOn);
-    if (kind === 'audio') S.micOn = turningOn; else S.camOn = turningOn;
-    return;
-  }
+  if (!S.localStream) { btn.classList.toggle('off'); return; }
   const tracks = kind === 'audio' ? S.localStream.getAudioTracks() : S.localStream.getVideoTracks();
   const turningOn = btn.classList.contains('off');
   tracks.forEach(t => t.enabled = turningOn);
@@ -542,300 +509,231 @@ function setJoinStatus(msg, kind) {
   el.className = 'join-status' + (kind ? ' ' + kind : '');
 }
 
-on($('#roomInput'), 'input', e => {
-  const clean = sanitizeRoomCode(e.target.value);
-  if (clean !== e.target.value) e.target.value = clean;
-});
 on($('#generateRoomBtn'), 'click', () => { $('#roomInput').value = randId(6); });
 on($('#copyJoinLinkBtn'), 'click', () => {
-  let code = sanitizeRoomCode($('#roomInput').value);
-  if (!code) { code = randId(6); }
-  $('#roomInput').value = code;
-  const link = location.origin + location.pathname + '?room=' + code;
+  let code = $('#roomInput').value.trim();
+  if (!code) { code = randId(6); $('#roomInput').value = code; }
+  const link = location.origin + location.pathname + '?room=' + encodeURIComponent(code);
   navigator.clipboard?.writeText(link).then(() => setJoinStatus('لینک دعوت کپی شد: ' + link, 'ok'))
     .catch(() => setJoinStatus('لینک دعوت: ' + link, 'ok'));
 });
 
 /* ---------------------------------------------------------------------
-   Join flow — decide host vs guest, open Peer, wire events
+   کد روم (حتی فارسی) رو به یه شناسه‌ی یکسان و امن برای PeerJS تبدیل می‌کنیم.
+   کیبورد فارسی گوشی‌ها خیلی وقت‌ها یه نویسه‌ی نامرئی (نیم‌فاصله) اضافه می‌کنه یا «ي»/«ك»
+   عربی به‌جای «ی»/«ک» فارسی تایپ می‌شه؛ این باعث می‌شد دو نفر با اینکه فکر می‌کردن کد یکسانی
+   زدن، عملاً وارد دو روم متفاوت بشن. همه‌ی این حالت‌ها رو یکسان‌سازی می‌کنیم.
 --------------------------------------------------------------------- */
+function normalizeRoomCode(raw) {
+  return raw
+    .normalize('NFKC')
+    .replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '')
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+    .replace(/[ي]/g, 'ی').replace(/[ك]/g, 'ک')
+    .replace(/\s+/g, '')
+    .toLowerCase()
+    .trim();
+}
+function slugifyRoom(raw) {
+  const norm = normalizeRoomCode(raw);
+  let hash = 0;
+  for (let i = 0; i < norm.length; i++) hash = (hash * 31 + norm.charCodeAt(i)) >>> 0;
+  return 'r' + hash.toString(36);
+}
+function slotPeerId(roomSlug, slot) { return `ykp-${roomSlug}-${slot}`; }
+function slotOf(peerId) { const parts = peerId.split('-'); return parseInt(parts[parts.length - 1], 10); }
+
+/* ---------------------------------------------------------------------
+   Join flow — هر نفر مستقل سعی می‌کنه یکی از جایگاه‌های ۱ تا MAX_SLOTS رو توی همون روم
+   بگیره. هیچ «هاست» تک‌نقطه‌ای وجود نداره: اگه نفر اول قطع بشه، بقیه کاملاً به کارشون
+   ادامه می‌دن چون از همون اول مستقیماً به همدیگه وصل بودن (mesh واقعی).
+--------------------------------------------------------------------- */
+function tryRegisterSlot(roomSlug, slot) {
+  return new Promise((resolve, reject) => {
+    const id = slotPeerId(roomSlug, slot);
+    const p = new Peer(id, { config: { iceServers: ICE_SERVERS } });
+    let done = false;
+    const cleanup = () => { p.off('open', onOpen); p.off('error', onError); };
+    function onOpen() { if (done) return; done = true; cleanup(); resolve(p); }
+    function onError(err) {
+      if (done) return; done = true; cleanup();
+      if (err && err.type === 'unavailable-id') { try { p.destroy(); } catch (e) {} reject({ retry: true }); }
+      else reject({ retry: false, err });
+    }
+    p.on('open', onOpen);
+    p.on('error', onError);
+  });
+}
+async function claimRoomSlot(roomSlug) {
+  for (let slot = 1; slot <= MAX_SLOTS; slot++) {
+    try { const p = await tryRegisterSlot(roomSlug, slot); return { peer: p, slot }; }
+    catch (e) { if (e && e.retry) continue; throw (e && e.err) || new Error('join-failed'); }
+  }
+  const full = new Error('room-full'); full.code = 'room-full'; throw full;
+}
+
 on($('#joinBtn'), 'click', handleJoinClick);
 async function handleJoinClick() {
   const name = $('#nameInput').value.trim();
   if (!name) { setJoinStatus('لطفاً اسمتو بنویس.', 'err'); $('#nameInput').focus(); return; }
   S.myName = name;
-  let roomCode = sanitizeRoomCode($('#roomInput').value);
+  let roomCode = $('#roomInput').value.trim();
   if (!roomCode) roomCode = randId(6);
   S.roomCode = roomCode;
-  S.hostId = 'ykp-host-' + roomCode;
+  S.roomSlug = slugifyRoom(roomCode);
 
   $('#joinBtn').disabled = true;
-  setJoinStatus('در حال آماده‌سازی موتور تماس…');
-
-  // Defensive: the PeerJS library itself must be loaded before we can do anything.
-  if (typeof Peer === 'undefined') {
-    await new Promise(r => setTimeout(r, 1200)); // give the jsdelivr fallback <script> a moment
-    if (typeof Peer === 'undefined') {
-      setJoinStatus('کتابخانه‌ی تماس بارگذاری نشد. اینترنتت رو چک کن یا صفحه رو رفرش کن.', 'err');
-      $('#joinBtn').disabled = false;
-      return;
-    }
-  }
-  // Give the second free TURN source a brief window to finish loading (non-blocking beyond this).
-  await Promise.race([dynamicIceReady, new Promise(r => setTimeout(r, 2500))]);
-
   setJoinStatus('در حال اتصال به سرور سیگنالینگ…');
-  attemptHostClaim(roomCode, 0);
-}
 
-/* Try to become the room's host (deterministic ID). If the ID is already
-   taken, someone else is already hosting this code, so fall back to
-   becomeGuest(). Retries a couple of times on non-fatal hiccups before
-   giving up, since a brief signaling blip should not sink the whole join. */
-function attemptHostClaim(roomCode, retryCount) {
-  const hostPeer = new Peer(S.hostId, { config: buildRtcConfig() });
-  let settled = false;
-
-  const fallbackToGuest = () => {
-    if (settled) return; settled = true;
-    hostPeer.destroy();
-    becomeGuest(roomCode, 0);
-  };
-
-  hostPeer.on('open', id => {
-    if (settled) return; settled = true;
-    S.peer = hostPeer; S.myId = id; S.isHost = true;
-    S.roster.set(id, { id, name: S.myName, camOn: S.camOn });
-    setJoinStatus('روم ساخته شد. منتظر بقیه…', 'ok');
-    wireHostPeerEvents(hostPeer);
+  try {
+    const { peer, slot } = await claimRoomSlot(S.roomSlug);
+    S.peer = peer; S.myId = peer.id; S.mySlot = slot;
+    S.roster.set(slot, { id: peer.id, slot, name: S.myName, connected: true });
+    setJoinStatus('وارد روم شدی. در حال پیدا کردن بقیه…', 'ok');
+    wirePeerEvents(peer);
     enterCallScreen();
-  });
-  hostPeer.on('error', err => {
-    if (settled) return;
-    if (err.type === 'unavailable-id') { fallbackToGuest(); return; }
-    if ((err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') && retryCount < 2) {
-      settled = true; hostPeer.destroy();
-      setJoinStatus('اتصال قطع شد، دوباره تلاش می‌کنیم…', 'warn');
-      setTimeout(() => attemptHostClaim(roomCode, retryCount + 1), 1200);
-      return;
-    }
-    settled = true;
-    setJoinStatus('اتصال ناموفق بود: ' + err.type, 'err');
+    scanAndCallOthers();
+    // چند بار دیگه هم دوباره تلاش می‌کنیم؛ اگه بار اول به‌خاطر تایمینگ شبکه جا موند، خودش جبران می‌شه
+    [3000, 7000, 13000].forEach(delay => S.rescanTimers.push(setTimeout(scanAndCallOthers, delay)));
+  } catch (e) {
+    setJoinStatus(e && e.code === 'room-full' ? `این روم پر شده (حداکثر ${MAX_SLOTS} نفر).` : 'اتصال ناموفق بود، دوباره امتحان کن.', 'err');
     $('#joinBtn').disabled = false;
-  });
-  // Safety net in case neither 'open' nor 'error' ever fires (rare hung sockets).
-  setTimeout(fallbackToGuest, 8000);
-}
-
-/* Connects to the host with several retries — a single failed handshake
-   attempt (common on flaky/mobile/VPN networks) no longer ends the join. */
-const GUEST_CONNECT_ATTEMPTS = 4;
-function becomeGuest(roomCode, retryCount) {
-  if (retryCount === 0) setJoinStatus('در حال ملحق شدن به روم…');
-  const myId = 'ykp-guest-' + roomCode + '-' + randId(5);
-  const peer = new Peer(myId, { config: buildRtcConfig() });
-  peer.on('disconnected', () => peer.reconnect());
-  wireGuestPeerEvents(peer);
-
-  let peerErrored = false;
-  peer.on('error', err => {
-    peerErrored = true;
-    if (err.type === 'peer-unavailable') return; // handled by the retry loop below
-    setJoinStatus('اتصال ناموفق بود: ' + err.type, 'err');
-    $('#joinBtn').disabled = false;
-  });
-
-  peer.on('open', id => {
-    S.peer = peer; S.myId = id; S.isHost = false;
-    connectToHost(peer, roomCode, 1);
-  });
-}
-
-function connectToHost(peer, roomCode, attempt) {
-  if (attempt === 1) setJoinStatus('در حال پیدا کردن هاست…');
-  else setJoinStatus(`تلاش دوباره برای اتصال… (${attempt}/${GUEST_CONNECT_ATTEMPTS})`, 'warn');
-
-  const conn = peer.connect(S.hostId, { reliable: true });
-  let opened = false;
-
-  const giveUpOrRetry = () => {
-    if (opened) return;
-    try { conn.close(); } catch { /* already closed */ }
-    if (attempt < GUEST_CONNECT_ATTEMPTS) {
-      setTimeout(() => connectToHost(peer, roomCode, attempt + 1), 500);
-    } else {
-      setJoinStatus('روم پیدا نشد یا هاست آفلاینه. کد رو چک کن یا یک روم جدید بساز.', 'err');
-      $('#joinBtn').disabled = false;
-      peer.destroy();
-    }
-  };
-
-  on(conn, 'open', () => {
-    opened = true;
-    S.dataConns.set(S.hostId, conn);
-    on(conn, 'data', data => handleData(S.hostId, data));
-    on(conn, 'close', () => {
-      toast('اتصال با هاست قطع شد', 'ممکنه چت گروهی دیگه کار نکنه، ولی تماس‌های برقرار شده ادامه دارن.');
-    });
-    conn.send({ type: 'join', id: S.myId, name: S.myName, camOn: S.camOn });
-    setJoinStatus('وصل شد.', 'ok');
-    enterCallScreen();
-  });
-  on(conn, 'error', giveUpOrRetry);
-  setTimeout(giveUpOrRetry, 4500);
+  }
 }
 
 /* ---------------------------------------------------------------------
-   Peer event wiring (host + guest share the call-answering logic)
+   یک‌بار برای همیشه سیم‌کشی رویدادهای peer — چه اولین نفر باشیم چه آخرین، رفتار یکسانه
 --------------------------------------------------------------------- */
-function wireHostPeerEvents(peer) {
-  on(peer, 'connection', conn => {
-    if (S.locked) { conn.on('open', () => { conn.send({ type: 'room-locked' }); conn.close(); }); return; }
-    on(conn, 'data', data => handleData(conn.peer, data));
-    on(conn, 'open', () => { S.dataConns.set(conn.peer, conn); });
-    on(conn, 'close', () => handlePeerLeft(conn.peer));
-  });
-  wireCallAnswering(peer);
-}
-function wireGuestPeerEvents(peer) { wireCallAnswering(peer); }
-
-function wireCallAnswering(peer) {
-  on(peer, 'call', call => {
-    call.answer(S.localStream || undefined);
-    registerMediaCall(call);
+function wirePeerEvents(peer) {
+  on(peer, 'call', handleIncomingCall);
+  on(peer, 'connection', handleIncomingData);
+  on(peer, 'error', err => {
+    if (err && err.type === 'peer-unavailable') return; // یعنی اون جایگاه خالیه، طبیعیه
   });
 }
 
-function registerMediaCall(call) {
-  S.mediaCalls.set(call.peer, call);
-  on(call, 'stream', remoteStream => {
-    S.remoteStreams.set(call.peer, remoteStream);
-    upsertVideoTile(call.peer);
-  });
-  on(call, 'close', () => removeParticipant(call.peer));
-  on(call, 'error', () => removeParticipant(call.peer));
+function handleIncomingCall(call) {
+  const slot = slotOf(call.peer);
+  if (S.locked && !(S.roster.get(slot) || {}).connected) { call.close(); return; }
+  call.answer(S.localStream || new MediaStream());
+  registerMediaCall(call);
+}
+function handleIncomingData(conn) {
+  const slot = slotOf(conn.peer);
+  if (S.locked && !(S.roster.get(slot) || {}).connected) {
+    on(conn, 'open', () => { conn.send({ type: 'room-locked' }); conn.close(); });
+    return;
+  }
+  trackDataConn(slot, conn);
+}
 
-  // If the underlying connection stalls or fails (common on flaky mobile
-  // networks / strict NATs), retry once instead of leaving a dead tile.
-  const pc = call.peerConnection;
-  if (pc) {
-    pc.addEventListener('iceconnectionstatechange', () => {
-      if ((pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') && S.mediaCalls.get(call.peer) === call) {
-        S.mediaCalls.delete(call.peer);
-        S.remoteStreams.delete(call.peer);
-        $(`#status-${call.peer}`)?.classList.add('show');
-        setTimeout(() => maybeCallPeer(call.peer), 1200);
+async function scanAndCallOthers() {
+  for (let slot = 1; slot <= MAX_SLOTS; slot++) {
+    if (slot === S.mySlot) continue;
+    const existing = S.roster.get(slot);
+    if (existing && (existing.connected || existing.dialInFlight)) continue;
+    const id = slotPeerId(S.roomSlug, slot);
+    try {
+      const call = S.peer.call(id, S.localStream || new MediaStream());
+      registerMediaCall(call, slot);
+      if (!existing || !existing.dataInFlight) {
+        const conn = S.peer.connect(id, { reliable: true });
+        trackDataConn(slot, conn);
       }
-    });
+    } catch (e) { /* جایگاه خالیه، بی‌خیال */ }
   }
 }
 
-/* Only the lexicographically-smaller peer id initiates the call, to avoid duplicate simultaneous calls */
-function maybeCallPeer(remoteId) {
-  if (remoteId === S.myId || S.mediaCalls.has(remoteId) || !S.roster.has(remoteId)) return;
-  if (S.myId < remoteId) {
-    const call = S.peer.call(remoteId, S.localStream || undefined);
-    if (call) registerMediaCall(call);
+function getOrCreateRosterEntry(slot) {
+  if (!S.roster.has(slot)) {
+    S.roster.set(slot, { id: slotPeerId(S.roomSlug, slot), slot, name: 'مهمان', connected: false, dialInFlight: false, dataInFlight: false });
   }
+  return S.roster.get(slot);
+}
+
+function registerMediaCall(call, knownSlot) {
+  const slot = knownSlot || slotOf(call.peer);
+  const p = getOrCreateRosterEntry(slot);
+  if (p.mediaCall && p.mediaCall !== call && p.connected) { call.close(); return; }
+  p.mediaCall = call;
+  p.dialInFlight = true;
+  S.mediaCalls.set(slot, call);
+  on(call, 'stream', remoteStream => {
+    const wasConnected = p.connected;
+    p.connected = true; p.dialInFlight = false;
+    S.remoteStreams.set(slot, remoteStream);
+    upsertVideoTile(call.peer, false, slot);
+    renderParticipants();
+    if (!wasConnected) addSystemChat(`${p.name} به تماس پیوست`);
+  });
+  on(call, 'close', () => { p.dialInFlight = false; if (p.connected) removeParticipant(slot); });
+  on(call, 'error', () => { p.dialInFlight = false; if (p.connected) removeParticipant(slot); });
+}
+
+function trackDataConn(slot, conn) {
+  const p = getOrCreateRosterEntry(slot);
+  if (p.dataConn && p.dataConn.open) return;
+  p.dataConn = conn;
+  p.dataInFlight = true;
+  S.dataConns.set(slot, conn);
+  on(conn, 'open', () => { p.dataInFlight = false; conn.send({ type: 'hello', name: S.myName }); });
+  on(conn, 'data', data => handleData(slot, data));
+  on(conn, 'close', () => { p.dataInFlight = false; });
+  on(conn, 'error', () => { p.dataInFlight = false; });
 }
 
 /* ---------------------------------------------------------------------
-   Data protocol handling
+   Data protocol handling — چون الان mesh واقعیه (نه ستاره‌ای از طریق یه هاست)،
+   هرکس مستقیماً برای همه‌ی بقیه پیام می‌فرسته، بدون نیاز به رله کردن از یه نفر خاص.
 --------------------------------------------------------------------- */
-function handleData(fromId, msg) {
+function handleData(fromSlot, msg) {
   if (!msg || !msg.type) return;
+  const p = getOrCreateRosterEntry(fromSlot);
   switch (msg.type) {
     case 'room-locked':
       setJoinStatus('این روم قفل شده و پذیرای عضو جدید نیست.', 'err');
       $('#joinBtn').disabled = false;
       break;
-    case 'join': {
-      // host receives a new guest joining
-      S.roster.set(msg.id, { id: msg.id, name: msg.name, camOn: msg.camOn !== false });
-      const rosterArr = Array.from(S.roster.values());
-      const conn = S.dataConns.get(msg.id);
-      conn && conn.send({ type: 'roster', peers: rosterArr, hostId: S.myId });
-      broadcastExcept(msg.id, { type: 'peer-joined', peer: { id: msg.id, name: msg.name, camOn: msg.camOn !== false } });
-      addSystemChat(`${msg.name} به تماس پیوست`);
+    case 'hello':
+      if (msg.name) p.name = msg.name;
       renderParticipants();
-      maybeCallPeer(msg.id);
-      break;
-    }
-    case 'roster': {
-      msg.peers.forEach(p => { S.roster.set(p.id, p); applyCamState(p.id); });
-      renderParticipants();
-      msg.peers.forEach(p => maybeCallPeer(p.id));
-      break;
-    }
-    case 'peer-joined':
-      S.roster.set(msg.peer.id, msg.peer);
-      applyCamState(msg.peer.id);
-      addSystemChat(`${msg.peer.name} به تماس پیوست`);
-      renderParticipants();
-      maybeCallPeer(msg.peer.id);
-      break;
-    case 'peer-left':
-      handlePeerLeft(msg.id);
+      updateTileLabel(fromSlot);
       break;
     case 'chat':
-      addChatMessage(msg.name, msg.text, false, msg.id);
-      if (S.isHost) broadcastExcept(msg.id, msg);
+      addChatMessage(p.name, msg.text, false);
       break;
     case 'reaction':
       spawnFloatingReaction(msg.emoji);
-      if (S.isHost) broadcastExcept(fromId, msg);
       break;
     case 'mute-all':
-      if (!S.micOn) break;
-      toggleMic(true);
-      toast('هاست همه رو بی‌صدا کرد', '');
+      if (S.micOn) { toggleMic(true); toast(`${p.name} همه رو بی‌صدا کرد`, ''); }
       break;
-    case 'screen': {
-      $(`#screentag-${msg.id}`)?.classList.toggle('show', msg.sharing);
-      const tile = $(`.video-tile[data-id="${msg.id}"]`);
-      if (tile) { if (msg.sharing) tile.classList.remove('cam-off'); else applyCamState(msg.id); }
-      if (S.isHost) broadcastExcept(fromId, msg);
+    case 'screen':
+      $(`#screentag-${slotPeerId(S.roomSlug, fromSlot)}`)?.classList.toggle('show', msg.sharing);
       break;
-    }
-    case 'cam': {
-      const p = S.roster.get(msg.id);
-      if (p) p.camOn = msg.camOn;
-      applyCamState(msg.id);
-      if (S.isHost) broadcastExcept(fromId, msg);
-      break;
-    }
   }
 }
-function applyCamState(id, isSelf = false) {
-  const tile = $(`.video-tile[data-id="${id}"]`);
-  if (!tile) return;
-  const camOn = isSelf ? S.camOn : (S.roster.get(id)?.camOn ?? true);
-  tile.classList.toggle('cam-off', !camOn);
+function broadcastData(msg) {
+  S.dataConns.forEach(conn => { if (conn.open) conn.send(msg); });
 }
-function broadcastExcept(exceptId, msg) {
-  S.dataConns.forEach((conn, id) => { if (id !== exceptId && conn.open) conn.send(msg); });
-}
-function broadcastAll(msg) { S.dataConns.forEach(conn => conn.open && conn.send(msg)); }
 
-function handlePeerLeft(id) {
-  const p = S.roster.get(id);
-  S.roster.delete(id);
-  S.dataConns.delete(id);
-  const call = S.mediaCalls.get(id); if (call) call.close();
-  S.mediaCalls.delete(id);
-  S.remoteStreams.delete(id);
+function removeParticipant(slot) {
+  const p = S.roster.get(slot);
+  const id = p ? p.id : slotPeerId(S.roomSlug, slot);
+  const call = S.mediaCalls.get(slot); if (call) call.close();
+  S.mediaCalls.delete(slot);
+  S.remoteStreams.delete(slot);
+  S.dataConns.delete(slot);
+  S.roster.delete(slot);
   removeVideoTile(id);
   if (p) addSystemChat(`${p.name} تماس رو ترک کرد`);
   renderParticipants();
-  if (S.isHost) broadcastAll({ type: 'peer-left', id });
 }
-function removeParticipant(id) { handlePeerLeft(id); }
 
 /* ---------------------------------------------------------------------
    Call screen UI: enter / video grid / timer
 --------------------------------------------------------------------- */
 function enterCallScreen() {
-  if ($('#screen-call').classList.contains('active')) return;
   $('#screen-join').classList.add('hidden');
   $('#screen-call').classList.add('active');
   $('#roomLabel').textContent = S.roomCode;
@@ -853,18 +751,19 @@ function updateTimer() {
   $('#callTimer').textContent = h > 0 ? `${pad2(h)}:${pad2(m)}:${pad2(s)}` : `${pad2(m)}:${pad2(s)}`;
 }
 
-function upsertVideoTile(id, isSelf = false) {
-  $('#emptyHint').style.display = 'none';
+function upsertVideoTile(id, isSelf = false, slot = null) {
+  const effSlot = slot != null ? slot : (isSelf ? S.mySlot : slotOf(id));
   let tile = $(`.video-tile[data-id="${id}"]`);
-  const name = isSelf ? (S.myName + ' (شما)') : (S.roster.get(id)?.name || 'مهمان');
+  const name = isSelf ? (S.myName + ' (شما)') : ((S.roster.get(effSlot) || {}).name || 'مهمان');
   if (!tile) {
     tile = document.createElement('div');
     tile.className = 'video-tile' + (isSelf ? ' self' : '');
     tile.dataset.id = id;
+    tile.dataset.slot = effSlot;
     tile.innerHTML = `
       <video autoplay playsinline ${isSelf ? 'muted' : ''}></video>
       <div class="tile-avatar-fallback">${initialsOf(name)}</div>
-      <div class="tile-status${isSelf ? '' : ' show'}" id="status-${id}">در حال اتصال…</div>
+      <div class="tile-status" id="status-${id}">در حال اتصال…</div>
       <div class="screen-share-tag" id="screentag-${id}">🖥 اشتراک صفحه</div>
       <button class="tile-fs-btn" type="button" aria-label="تمام‌صفحه">
         <svg class="ic-expand" viewBox="0 0 24 24" width="14" height="14"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -877,12 +776,22 @@ function upsertVideoTile(id, isSelf = false) {
     on($('.tile-fs-btn', tile), 'click', e => { e.stopPropagation(); toggleTileFullscreen(tile); });
   }
   const video = $('video', tile);
-  const stream = isSelf ? S.localStream : S.remoteStreams.get(id);
-  if (stream) { video.srcObject = stream; $(`#status-${id}`)?.classList.remove('show'); }
-  applyCamState(id, isSelf);
+  const stream = isSelf ? S.localStream : S.remoteStreams.get(effSlot);
+  const hasVideoTrack = !!(stream && stream.getVideoTracks().length);
+  if (stream) video.srcObject = stream;
+  $('.tile-avatar-fallback', tile).style.display = hasVideoTrack ? 'none' : 'grid';
+  if (stream) $(`#status-${id}`)?.classList.remove('show');
   relayoutGrid();
 }
 function removeVideoTile(id) { $(`.video-tile[data-id="${id}"]`)?.remove(); relayoutGrid(); }
+function updateTileLabel(slot) {
+  const p = S.roster.get(slot);
+  if (!p) return;
+  const tile = $(`.video-tile[data-slot="${slot}"]`);
+  if (!tile) return;
+  $('.tile-label', tile).textContent = p.name;
+  $('.tile-avatar-fallback', tile).textContent = initialsOf(p.name);
+}
 
 /* ---------------------------------------------------------------------
    Fullscreen toggle for any video tile (self view or a shared screen)
@@ -899,7 +808,9 @@ function toggleTileFullscreen(tile) {
 function relayoutGrid() {
   const grid = $('#videoGrid');
   const n = grid.children.length;
-  if (n === 0) { $('#emptyHint').style.display = 'flex'; return; }
+  const othersConnected = Array.from(S.roster.values()).some(p => p.id !== S.myId && p.connected);
+  $('#emptyHint').style.display = othersConnected ? 'none' : 'flex';
+  if (n === 0) return;
   const cols = Math.ceil(Math.sqrt(n));
   grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 }
@@ -910,23 +821,26 @@ function relayoutGrid() {
 function renderParticipants() {
   const list = $('#participantsList');
   list.innerHTML = '';
+  const hostSlot = currentHostSlot();
   const meRow = document.createElement('div');
   meRow.className = 'p-row';
   meRow.innerHTML = `<span class="av">${initialsOf(S.myName)}</span>
-    <div><b>${escapeHTML(S.myName)} ${S.isHost ? '<span class="host-tag">هاست</span>' : ''}</b><small>شما</small></div>`;
+    <div><b>${escapeHTML(S.myName)} ${S.mySlot === hostSlot ? '<span class="host-tag">هاست</span>' : ''}</b><small>شما</small></div>`;
   list.appendChild(meRow);
-  S.roster.forEach((p, id) => {
-    if (id === S.myId) return;
+  let count = 1;
+  S.roster.forEach((p) => {
+    if (p.id === S.myId) return;
+    if (!p.connected) return; // جایگاه خالیه یا هنوز واقعاً وصل نشده — توی لیست نشونش نده
+    count++;
     const row = document.createElement('div');
     row.className = 'p-row';
     row.innerHTML = `<span class="av">${initialsOf(p.name)}</span>
-      <div><b>${escapeHTML(p.name)} ${id === S.hostId ? '<span class="host-tag">هاست</span>' : ''}</b><small>${S.remoteStreams.has(id) ? 'متصل' : 'در حال اتصال…'}</small></div>`;
+      <div><b>${escapeHTML(p.name)} ${p.slot === hostSlot ? '<span class="host-tag">هاست</span>' : ''}</b><small>${p.connected ? 'متصل' : 'در حال اتصال…'}</small></div>`;
     list.appendChild(row);
   });
-  const count = S.roster.size + 1;
   $('#spCount').textContent = count;
   $('#peopleBadge').textContent = count;
-  $('#hostActions').style.display = S.isHost ? 'flex' : 'none';
+  $('#hostActions').style.display = 'flex';
 }
 
 /* ---------------------------------------------------------------------
@@ -963,9 +877,7 @@ on($('#chatForm'), 'submit', e => {
   const text = input.value.trim();
   if (!text) return;
   addChatMessage(S.myName, text, true);
-  const msg = { type: 'chat', id: S.myId, name: S.myName, text };
-  if (S.isHost) broadcastAll(msg);
-  else S.dataConns.get(S.hostId)?.send(msg);
+  broadcastData({ type: 'chat', text });
   input.value = '';
 });
 
@@ -1006,37 +918,40 @@ on($('#camBtn'), 'click', () => {
   S.localStream?.getVideoTracks().forEach(t => t.enabled = S.camOn);
   $('#camBtn').classList.toggle('active', S.camOn);
   $('#camBtn').classList.toggle('muted-state', !S.camOn);
-  applyCamState(S.myId, true);
-  const camMsg = { type: 'cam', id: S.myId, camOn: S.camOn };
-  if (S.isHost) broadcastAll(camMsg); else S.dataConns.get(S.hostId)?.send(camMsg);
+  const fb = $(`.video-tile[data-id="${S.myId}"] .tile-avatar-fallback`);
+  if (fb) fb.style.display = S.camOn ? 'none' : 'grid';
 });
 
 on($('#screenBtn'), 'click', toggleScreenShare);
 async function toggleScreenShare() {
   const btn = $('#screenBtn');
   if (S.screenStream) { stopScreenShare(); return; }
+  let stream, gotAudio = false;
   try {
-    // audio:true asks for tab/system audio where the browser/OS supports it (e.g. "share tab audio" checkbox in Chrome)
-    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-    S.screenStream = stream;
-    btn.classList.add('on');
+    // اول با صدای سیستم امتحان می‌کنیم؛ خیلی از مرورگرها (مخصوصاً موبایل) این رو پشتیبانی نمی‌کنن
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    gotAudio = stream.getAudioTracks().length > 0;
+  } catch (e1) {
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    } catch (e2) { toast('اشتراک صفحه لغو شد', ''); return; }
+  }
+  S.screenStream = stream;
+  btn.classList.add('on');
 
-    replaceOutgoingTrack('video', stream.getVideoTracks()[0]);
-    const screenAudioTrack = stream.getAudioTracks()[0];
-    if (screenAudioTrack) replaceOutgoingTrack('audio', screenAudioTrack);
+  replaceOutgoingTrack('video', stream.getVideoTracks()[0]);
+  // نکته‌ی مهم: عمداً صدای میکروفون رو با صدای سیستم عوض نمی‌کنیم — وگرنه صدای خودتون برای بقیه قطع می‌شد.
+  // صدای سیستم/صفحه فقط تو پیش‌نمایش خودتون پخش می‌شه، ولی صدای شما همچنان برای بقیه ارسال می‌شه.
 
-    const tile = $(`.video-tile[data-id="${S.myId}"]`);
-    const video = $('video', tile);
-    if (video) video.srcObject = stream;
-    if (tile) tile.classList.remove('cam-off');
-    $(`#screentag-${S.myId}`)?.classList.add('show');
-    broadcastScreenStatus(true);
+  const tile = $(`.video-tile[data-id="${S.myId}"] video`);
+  if (tile) tile.srcObject = stream;
+  $(`#screentag-${S.myId}`)?.classList.add('show');
+  broadcastScreenStatus(true);
 
-    toast('اشتراک صفحه فعال شد', screenAudioTrack ? 'تصویر و صدای صفحه برای بقیه ارسال می‌شه.' : 'تصویر صفحه برای بقیه ارسال می‌شه (بدون صدای سیستم).');
+  toast('اشتراک صفحه فعال شد', gotAudio ? 'تصویر صفحه برای بقیه ارسال می‌شه (صدای میکروفونتون هم قطع نمی‌شه).' : 'تصویر صفحه برای بقیه ارسال می‌شه (بدون صدای سیستم).');
 
-    // Fires when the user clicks the browser's own "Stop sharing" bar
-    stream.getVideoTracks()[0].addEventListener('ended', () => stopScreenShare());
-  } catch { toast('اشتراک صفحه لغو شد', ''); }
+  // Fires when the user clicks the browser's own "Stop sharing" bar
+  stream.getVideoTracks()[0].addEventListener('ended', () => stopScreenShare());
 }
 function stopScreenShare() {
   const btn = $('#screenBtn');
@@ -1047,7 +962,6 @@ function stopScreenShare() {
   replaceOutgoingTrack('audio', S.localStream?.getAudioTracks()[0] || null);
   const tile = $(`.video-tile[data-id="${S.myId}"] video`);
   if (tile && S.localStream) tile.srcObject = S.localStream;
-  applyCamState(S.myId, true);
   $(`#screentag-${S.myId}`)?.classList.remove('show');
   // exit fullscreen if the shared tile happened to be in fullscreen
   const fsTile = document.fullscreenElement || document.webkitFullscreenElement;
@@ -1055,8 +969,7 @@ function stopScreenShare() {
   broadcastScreenStatus(false);
 }
 function broadcastScreenStatus(sharing) {
-  const msg = { type: 'screen', id: S.myId, sharing };
-  if (S.isHost) broadcastAll(msg); else S.dataConns.get(S.hostId)?.send(msg);
+  broadcastData({ type: 'screen', sharing });
 }
 function replaceOutgoingTrack(kind, track) {
   S.mediaCalls.forEach(call => {
@@ -1069,8 +982,7 @@ const reactionsPicker = $('#reactionsPicker');
 on($('#reactionsBtn'), 'click', e => { e.stopPropagation(); reactionsPicker.classList.toggle('show'); });
 $all('button', reactionsPicker).forEach(b => on(b, 'click', () => {
   spawnFloatingReaction(b.textContent);
-  const msg = { type: 'reaction', id: S.myId, emoji: b.textContent };
-  if (S.isHost) broadcastAll(msg); else S.dataConns.get(S.hostId)?.send(msg);
+  broadcastData({ type: 'reaction', emoji: b.textContent });
   reactionsPicker.classList.remove('show');
 }));
 on(document, 'click', e => { if (!e.target.closest('#reactionsBtn') && !e.target.closest('#reactionsPicker')) reactionsPicker.classList.remove('show'); });
@@ -1084,7 +996,7 @@ function spawnFloatingReaction(emoji) {
   setTimeout(() => el.remove(), 2300);
 }
 
-on($('#muteAllBtn'), 'click', () => { broadcastAll({ type: 'mute-all' }); toast('درخواست بی‌صدا شدن به همه ارسال شد', ''); });
+on($('#muteAllBtn'), 'click', () => { broadcastData({ type: 'mute-all' }); toast('درخواست بی‌صدا شدن به همه ارسال شد', ''); });
 on($('#lockRoomBtn'), 'click', () => {
   S.locked = !S.locked;
   $('#lockChip').classList.toggle('show', S.locked);
@@ -1092,13 +1004,13 @@ on($('#lockRoomBtn'), 'click', () => {
   toast(S.locked ? 'روم قفل شد' : 'روم باز شد', S.locked ? 'عضو جدید نمی‌تونه وارد بشه.' : 'عضو جدید می‌تونه وارد بشه.');
 });
 on($('#copyLinkBtn'), 'click', () => {
-  const link = location.origin + location.pathname + '?room=' + S.roomCode;
+  const link = location.origin + location.pathname + '?room=' + encodeURIComponent(S.roomCode);
   navigator.clipboard?.writeText(link).then(() => toast('لینک دعوت کپی شد', link)).catch(() => toast('لینک دعوت', link, 6000));
 });
 
 on($('#leaveBtn'), 'click', () => {
   clearInterval(S.timerHandle);
-  if (S.isHost) broadcastAll({ type: 'peer-left', id: S.myId });
+  S.rescanTimers.forEach(t => clearTimeout(t));
   S.dataConns.forEach(c => c.close());
   S.mediaCalls.forEach(c => c.close());
   S.localStream?.getTracks().forEach(t => t.stop());
