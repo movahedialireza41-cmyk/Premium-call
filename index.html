@@ -388,7 +388,6 @@ const ICE_SERVERS = [
   { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
   { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
   { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:relay1.expressturn.com:3478', username: 'ef4L5RQ7GNCDNJ2SBK', credential: 'gKHzHkCzr3jXNHy3' },
 ];
 const MAX_SLOTS = 8; // حداکثر ظرفیت هر روم (mesh-topology هرچی بیشتر بشه، بار روی اینترنت هر نفر بیشتر می‌شه)
 
@@ -551,15 +550,21 @@ function slotOf(peerId) { const parts = peerId.split('-'); return parseInt(parts
 function tryRegisterSlot(roomSlug, slot) {
   return new Promise((resolve, reject) => {
     const id = slotPeerId(roomSlug, slot);
-    const p = new Peer(id, { config: { iceServers: ICE_SERVERS } });
+    const p = new Peer(id, { host: '0.peerjs.com', port: 443, secure: true, config: { iceServers: ICE_SERVERS } });
     let done = false;
-    const cleanup = () => { p.off('open', onOpen); p.off('error', onError); };
+    const cleanup = () => { p.off('open', onOpen); p.off('error', onError); clearTimeout(timer); };
     function onOpen() { if (done) return; done = true; cleanup(); resolve(p); }
     function onError(err) {
       if (done) return; done = true; cleanup();
       if (err && err.type === 'unavailable-id') { try { p.destroy(); } catch (e) {} reject({ retry: true }); }
       else reject({ retry: false, err });
     }
+    // اگه سرور سیگنالینگ اصلاً جواب نده (نه open نه error)، بی‌نهایت منتظر نمونیم
+    const timer = setTimeout(() => {
+      if (done) return; done = true; cleanup();
+      try { p.destroy(); } catch (e) {}
+      reject({ retry: false, err: { type: 'timeout' } });
+    }, 9000);
     p.on('open', onOpen);
     p.on('error', onError);
   });
@@ -570,6 +575,19 @@ async function claimRoomSlot(roomSlug) {
     catch (e) { if (e && e.retry) continue; throw (e && e.err) || new Error('join-failed'); }
   }
   const full = new Error('room-full'); full.code = 'room-full'; throw full;
+}
+// روی شبکه‌های ناپایدار، سرور رایگان سیگنالینگ گاهی یه‌بار جواب نمی‌ده؛ قبل از تسلیم شدن چندبار دیگه امتحان می‌کنیم
+async function claimRoomSlotWithRetries(roomSlug, attempts = 3) {
+  let lastErr = null;
+  for (let i = 0; i < attempts; i++) {
+    try { return await claimRoomSlot(roomSlug); }
+    catch (e) {
+      if (e && e.code === 'room-full') throw e; // پر بودن روم دلیلش شبکه نیست، دیگه تلاش نکن
+      lastErr = e;
+      if (i < attempts - 1) { setJoinStatus(`اتصال ناموفق بود، دوباره امتحان می‌کنم… (${i + 2}/${attempts})`); await new Promise(r => setTimeout(r, 1500)); }
+    }
+  }
+  throw lastErr || new Error('join-failed');
 }
 
 on($('#joinBtn'), 'click', handleJoinClick);
@@ -586,7 +604,7 @@ async function handleJoinClick() {
   setJoinStatus('در حال اتصال به سرور سیگنالینگ…');
 
   try {
-    const { peer, slot } = await claimRoomSlot(S.roomSlug);
+    const { peer, slot } = await claimRoomSlotWithRetries(S.roomSlug);
     S.peer = peer; S.myId = peer.id; S.mySlot = slot;
     S.roster.set(slot, { id: peer.id, slot, name: S.myName, connected: true });
     setJoinStatus('وارد روم شدی. در حال پیدا کردن بقیه…', 'ok');
@@ -596,7 +614,8 @@ async function handleJoinClick() {
     // چند بار دیگه هم دوباره تلاش می‌کنیم؛ اگه بار اول به‌خاطر تایمینگ شبکه جا موند، خودش جبران می‌شه
     [3000, 7000, 13000].forEach(delay => S.rescanTimers.push(setTimeout(scanAndCallOthers, delay)));
   } catch (e) {
-    setJoinStatus(e && e.code === 'room-full' ? `این روم پر شده (حداکثر ${MAX_SLOTS} نفر).` : 'اتصال ناموفق بود، دوباره امتحان کن.', 'err');
+    const errType = e && e.type ? e.type : (e && e.message) || 'نامشخص';
+    setJoinStatus(e && e.code === 'room-full' ? `این روم پر شده (حداکثر ${MAX_SLOTS} نفر).` : `اتصال ناموفق بود (${errType}). چند لحظه دیگه دوباره امتحان کن.`, 'err');
     $('#joinBtn').disabled = false;
   }
 }
